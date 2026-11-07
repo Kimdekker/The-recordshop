@@ -1,0 +1,753 @@
+@layer components {
+  /* --- Buttons ------------------------------------------------------------ */
+  .btn {
+    --btn-bg: var(--surface);
+    --btn-fg: var(--text);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-block-size: 2.75rem;
+    padding: 0.55rem 1.1rem;
+    border: 1px solid color-mix(in oklch, var(--btn-bg) 70%, white 10%);
+    border-radius: 999px;
+    background: var(--btn-bg);
+    color: var(--btn-fg);
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.15s, translate 0.1s;
+
+    &:hover:not(:disabled) {
+      background: color-mix(in oklch, var(--btn-bg) 88%, white);
+    }
+    &:active:not(:disabled) {
+      translate: 0 1px;
+    }
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+  .btn-primary {
+    --btn-bg: var(--accent);
+    --btn-fg: var(--accent-ink);
+  }
+  .btn-ghost {
+    --btn-bg: transparent;
+    border-color: var(--line);
+  }
+  .btn-small {
+    min-block-size: 2.1rem;
+    padding: 0.3rem 0.8rem;
+    font-size: 0.875rem;
+  }
+
+  /* --- Forms ---------------------------------------------------------------- */
+  .field {
+    display: grid;
+    gap: 0.35rem;
+
+    label,
+    .label {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    .hint {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+  }
+  .input,
+  .textarea {
+    inline-size: 100%;
+    padding: 0.7rem 0.9rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-s);
+    background: var(--bg-raised);
+    transition: border-color 0.15s;
+
+    &::placeholder {
+      color: color-mix(in oklch, var(--text-muted) 75%, transparent);
+    }
+    &:focus-visible {
+      outline-offset: 0;
+      border-color: var(--focus);
+    }
+    &:user-invalid {
+      border-color: var(--danger);
+    }
+  }
+  .textarea {
+    field-sizing: content;
+    min-block-size: 6lh;
+    resize: vertical;
+  }
+  .checkbox {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+
+    input {
+      accent-color: var(--accent);
+      inline-size: 1.15rem;
+      block-size: 1.15rem;
+    }
+  }
+
+  .search-form {
+    display: flex;
+    gap: 0.5rem;
+    max-inline-size: 640px;
+
+    .input {
+      border-radius: 999px;
+      padding-inline: 1.2rem;
+    }
+  }
+
+  /* --- Messages ------------------------------------------------------------ */
+  .notice {
+    padding: 0.85rem 1rem;
+    border: 1px solid color-mix(in oklch, var(--gold) 40%, transparent);
+    border-radius: var(--radius-s);
+    background: color-mix(in oklch, var(--gold) 12%, var(--bg));
+
+    &.error {
+      border-color: color-mix(in oklch, var(--danger) 50%, transparent);
+      background: color-mix(in oklch, var(--danger) 12%, var(--bg));
+    }
+    &.success {
+      border-color: color-mix(in oklch, var(--success) 50%, transparent);
+      background: color-mix(in oklch, var(--success) 10%, var(--bg));
+    }
+  }
+
+  /* --- Album grid & card ------------------------------------------------- */
+  .album-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(170px, 42%), 1fr));
+    gap: 2rem 1.25rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  .album-card {
+    container-type: inline-size;
+    position: relative;
+
+    .sleeve {
+      position: relative;
+      aspect-ratio: 1;
+      margin-block-end: 0.75rem;
+    }
+    .cover {
+      position: relative;
+      z-index: 1;
+      inline-size: 100%;
+      block-size: 100%;
+      object-fit: cover;
+      border-radius: 3px;
+      background: var(--surface);
+      box-shadow:
+        0 1px 0 oklch(1 0 0 / 0.1) inset,
+        0 14px 24px -10px oklch(0 0 0 / 0.7);
+    }
+    /* The record peeking out of the sleeve on hover/focus */
+    .peek {
+      position: absolute;
+      inset: 4%;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle, var(--accent) 0 15%, oklch(0.1 0 0) 16% 18%, transparent 19%),
+        repeating-radial-gradient(circle, oklch(0.14 0 0) 0 2px, oklch(0.09 0 0) 2px 4px);
+      transition: translate 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    &:hover .peek,
+    &:focus-within .peek {
+      translate: 26% 0;
+    }
+
+    h3 {
+      font: 600 1rem/1.3 var(--font-body);
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      overflow: hidden;
+    }
+    /* One link per card, the whole card is clickable */
+    a {
+      text-decoration: none;
+      &::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+      }
+      &:focus-visible {
+        outline: none;
+      }
+    }
+    &:has(a:focus-visible) .cover {
+      outline: 3px solid var(--focus);
+      outline-offset: 3px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.25rem 0.6rem;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+    .badges {
+      position: absolute;
+      z-index: 3;
+      inset-block-start: 0.5rem;
+      inset-inline-start: 0.5rem;
+      display: flex;
+      gap: 0.3rem;
+      pointer-events: none;
+    }
+
+    @container (max-width: 150px) {
+      .meta .rating {
+        display: none;
+      }
+    }
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+
+    &.accent {
+      background: var(--accent);
+      color: var(--accent-ink);
+    }
+    &.gold {
+      background: var(--gold);
+      color: oklch(0.25 0.05 85);
+    }
+  }
+
+  .shelf {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(160px, 190px);
+    gap: 1.25rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    padding: 0 0 1rem;
+    list-style: none;
+    scrollbar-width: thin;
+
+    > li {
+      scroll-snap-align: start;
+    }
+  }
+
+  /* --- Star rating (display) ------------------------------------------- */
+  .stars {
+    --size: 1em;
+    display: inline-block;
+    inline-size: calc(var(--size) * 5);
+    block-size: var(--size);
+    background: linear-gradient(
+      90deg,
+      var(--gold) calc(var(--rating) / 5 * 100%),
+      color-mix(in oklch, var(--text-muted) 35%, transparent) 0
+    );
+    mask: var(--star) 0 0 / var(--size) var(--size) repeat-x;
+    vertical-align: -0.12em;
+  }
+
+  /* --- Star rating (input): radios, half stars ------------------------ */
+  .star-input {
+    border: 0;
+    padding: 0;
+
+    legend {
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-block-end: 0.35rem;
+    }
+    .star-row {
+      --size: 2.2rem;
+      display: inline-flex;
+      flex-direction: row-reverse; /* so that "~" fills the stars to the left */
+      justify-content: flex-end;
+    }
+    input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+    label {
+      inline-size: calc(var(--size) / 2);
+      block-size: var(--size);
+      cursor: pointer;
+      background: color-mix(in oklch, var(--text-muted) 35%, transparent);
+      mask: var(--star) 0 0 / var(--size) var(--size) no-repeat;
+
+      &.right {
+        mask-position: calc(var(--size) / -2) 0;
+      }
+    }
+    input:checked ~ label,
+    input:checked + label {
+      background: var(--gold);
+    }
+    /* Hover preview */
+    .star-row:hover label {
+      background: color-mix(in oklch, var(--text-muted) 35%, transparent);
+    }
+    .star-row label:hover,
+    .star-row label:hover ~ label {
+      background: var(--gold);
+    }
+    input:focus-visible + label {
+      outline: 2px solid var(--focus);
+      outline-offset: 2px;
+      border-radius: 2px;
+    }
+    .star-value {
+      margin-inline-start: 0.75rem;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+  }
+
+  /* --- Tokens --------------------------------------------------------------- */
+  .tokens {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.8rem 0.35rem 0.4rem;
+    border: 1px solid color-mix(in oklch, var(--gold) 35%, transparent);
+    border-radius: 999px;
+    background: color-mix(in oklch, var(--gold) 10%, var(--bg-raised));
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+
+    .coin {
+      inline-size: 1.3rem;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 35% 30%, oklch(0.95 0.1 90), var(--gold) 55%, oklch(0.6 0.12 70));
+      box-shadow: inset 0 0 0 2px oklch(0.7 0.13 75);
+    }
+  }
+
+  .token-info {
+    inline-size: min(22rem, calc(100vw - 2rem));
+    padding: 1.1rem 1.2rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--bg-raised);
+    color: var(--text);
+    box-shadow: var(--shadow);
+    inset: auto;
+    position-area: bottom span-left;
+    margin-block-start: 0.5rem;
+
+    h2 {
+      font-size: 1.1rem;
+      margin-block-end: 0.5rem;
+    }
+    ul {
+      padding-inline-start: 1.1rem;
+      display: grid;
+      gap: 0.3rem;
+      font-size: 0.9rem;
+    }
+  }
+
+  /* --- Dialog ------------------------------------------------------------- */
+  dialog.modal {
+    inline-size: min(30rem, calc(100vw - 2rem));
+    padding: 2rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-l);
+    background: var(--bg-raised);
+    color: var(--text);
+    box-shadow: var(--shadow);
+    text-align: center;
+    opacity: 1;
+    scale: 1;
+    transition: opacity 0.25s, scale 0.25s, overlay 0.25s allow-discrete, display 0.25s allow-discrete;
+
+    @starting-style {
+      opacity: 0;
+      scale: 0.95;
+    }
+    &::backdrop {
+      background: oklch(0 0 0 / 0.6);
+      backdrop-filter: blur(3px);
+    }
+    .big-number {
+      font: 800 3.5rem/1 var(--font-display);
+      color: var(--gold);
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.6rem;
+      margin-block-start: 1.5rem;
+    }
+  }
+
+  /* --- Tables --------------------------------------------------------------- */
+  .table {
+    inline-size: 100%;
+    border-collapse: collapse;
+
+    caption {
+      text-align: start;
+      color: var(--text-muted);
+      margin-block-end: 0.75rem;
+    }
+    th,
+    td {
+      padding: 0.75rem 0.6rem;
+      border-block-end: 1px solid var(--line);
+      text-align: start;
+      vertical-align: middle;
+    }
+    th {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    td.num {
+      font-variant-numeric: tabular-nums;
+    }
+  }
+}
+
+@layer components {
+  /* --- The one YouTube player, positioned over the active slot ----------- */
+  .yt-host {
+    z-index: 30;
+    border-radius: var(--radius-s);
+    overflow: hidden;
+    background: #000;
+
+    &[data-hidden] {
+      /* Not removed (that would stop the music), just tucked away. */
+      position: fixed !important;
+      inset: auto 0 0 auto !important;
+      inline-size: 1px !important;
+      block-size: 1px !important;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .yt-host-inner,
+    iframe {
+      inline-size: 100%;
+      block-size: 100%;
+      border: 0;
+    }
+  }
+
+  /* --- Mini player: sleeve on the side, LP sticks halfway out ----------- */
+  .mini-player {
+    --record: 190px;
+    --panel: 232px;
+    position: fixed;
+    inset-inline-end: 1rem;
+    inset-block-end: 1rem;
+    z-index: 25;
+    inline-size: var(--panel);
+    padding-block-start: calc(var(--record) / 2);
+    animation: mini-in 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .mini-record {
+    position: absolute;
+    z-index: 1;
+    inset-block-start: 0;
+    inset-inline-start: 50%;
+    translate: -50% 0;
+    inline-size: var(--record);
+    aspect-ratio: 1;
+    border-radius: 50%;
+
+    &:focus-visible {
+      outline-offset: 4px;
+      border-radius: 50%;
+    }
+  }
+  .mini-vinyl {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle, transparent 0 33%, oklch(0.12 0 0) 33.5% 45%, transparent 45.5%),
+      repeating-radial-gradient(circle, oklch(0.16 0.005 60) 0 1.5px, oklch(0.21 0.005 60) 1.5px 3px);
+    box-shadow:
+      0 0 0 1px oklch(0.08 0 0),
+      0 10px 24px oklch(0 0 0 / 0.55);
+    animation: tt-spin 1.8s linear infinite;
+    animation-play-state: paused;
+    transition: translate 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+
+    .mini-player[data-spinning='true'] & {
+      animation-play-state: running;
+    }
+    img {
+      position: absolute;
+      inset: 33.333%;
+      inline-size: 33.333%;
+      block-size: 33.333%;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 48.5%;
+      border-radius: 50%;
+      background: #d6d3d1;
+    }
+  }
+  /* Hover: the record slides out a little further */
+  .mini-record:hover .mini-vinyl,
+  .mini-record:focus-visible .mini-vinyl {
+    translate: 0 -8px;
+  }
+
+  /* The sleeve: card the record sits in */
+  .mini-sleeve {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    gap: 0.75rem;
+    padding: 1rem 1rem 0.85rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius) var(--radius) var(--radius-l) var(--radius-l);
+    background:
+      linear-gradient(180deg, oklch(1 0 0 / 0.05), transparent 30%),
+      color-mix(in oklch, var(--bg-raised) 94%, transparent);
+    backdrop-filter: blur(14px) saturate(1.2);
+    box-shadow:
+      0 1px 0 oklch(1 0 0 / 0.06) inset,
+      0 24px 50px -20px oklch(0 0 0 / 0.85);
+
+    /* Sleeve opening: dark slit the record sticks out of */
+    &::before {
+      content: '';
+      position: absolute;
+      inset-block-start: -1px;
+      inset-inline: 10%;
+      block-size: 4px;
+      border-radius: 0 0 4px 4px;
+      background: oklch(0.08 0 0 / 0.8);
+    }
+  }
+
+  .mini-info {
+    display: grid;
+    gap: 0.1rem;
+    min-inline-size: 0;
+    text-align: center;
+
+    p {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+  .mini-title {
+    font: 600 1.05rem/1.25 var(--font-display);
+
+    a {
+      text-decoration: none;
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+  .mini-artist {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+  }
+  .mini-track {
+    margin-block-start: 0.35rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .mini-hint {
+    color: var(--gold);
+    font-size: 0.8rem;
+    white-space: normal !important;
+  }
+  .mini-progress {
+    appearance: none;
+    inline-size: 100%;
+    block-size: 3px;
+    margin-block-start: 0.5rem;
+    border: 0;
+    border-radius: 3px;
+    background: var(--line);
+    overflow: hidden;
+
+    &::-webkit-progress-bar {
+      background: var(--line);
+    }
+    &::-webkit-progress-value {
+      background: var(--accent);
+    }
+    &::-moz-progress-bar {
+      background: var(--accent);
+    }
+  }
+
+  .mini-controls {
+    display: flex;
+    justify-content: center;
+    gap: 0.4rem;
+  }
+
+  /* YouTube monitor: as subtle as allowed (visible, ≥ 200×200) */
+  .mini-monitor {
+    display: grid;
+    gap: 0.25rem;
+    justify-items: center;
+    padding-block-start: 0.75rem;
+    border-block-start: 1px solid var(--line);
+    font-size: 0.65rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: color-mix(in oklch, var(--text-muted) 70%, transparent);
+  }
+  .mini-screen {
+    inline-size: 200px;
+    block-size: 200px;
+    border-radius: var(--radius-s);
+    background: #000;
+    box-shadow:
+      0 0 0 3px oklch(0.12 0 0),
+      0 0 0 4px var(--line);
+  }
+
+  /* Low window: monitor next to the sleeve, so the whole thing stays low */
+  @media (min-width: 700px) and (max-height: 720px) {
+    .mini-player {
+      --record: 150px;
+      inline-size: auto;
+    }
+    .mini-sleeve {
+      grid-template-columns: 200px var(--panel);
+      grid-template-areas: 'monitor info' 'monitor controls';
+      align-items: center;
+    }
+    .mini-info {
+      grid-area: info;
+    }
+    .mini-controls {
+      grid-area: controls;
+    }
+    .mini-monitor {
+      grid-area: monitor;
+      grid-row: 1 / span 2;
+      padding: 0;
+      border: 0;
+    }
+    .mini-record {
+      inset-inline-start: auto;
+      inset-inline-end: calc(var(--panel) / 2 + 1rem);
+      translate: 50% 0;
+    }
+  }
+
+  /* Phone: bar at the bottom, LP half in view on the left */
+  @media (max-width: 699px) {
+    .mini-player {
+      --record: 8rem;
+      inset: auto 0 0 0;
+      inline-size: auto;
+      padding: 0;
+    }
+    .mini-record {
+      inset-block-start: auto;
+      inset-block-end: calc(var(--record) * -0.45);
+      inset-inline-start: calc(var(--record) * -0.3);
+      translate: none;
+    }
+    .mini-sleeve {
+      grid-template-columns: minmax(0, 1fr) auto;
+      padding: 0.75rem var(--gutter) 0.75rem calc(var(--record) * 0.8);
+      border-radius: var(--radius) var(--radius) 0 0;
+      border-inline: 0;
+      border-block-end: 0;
+
+      &::before {
+        display: none;
+      }
+    }
+    .mini-info {
+      text-align: start;
+    }
+    .mini-controls .btn-ghost {
+      display: none;
+    }
+    .mini-monitor {
+      position: absolute;
+      inset-inline-end: var(--gutter);
+      inset-block-end: calc(100% + 0.6rem);
+      padding: 0;
+      border: 0;
+    }
+  }
+
+  /* Card links: the artist link sits above the stretched card link */
+  .album-card .artist-link {
+    position: relative;
+    z-index: 3;
+    text-decoration: none;
+
+    &:hover {
+      color: var(--text);
+      text-decoration: underline;
+    }
+  }
+
+    @keyframes mini-in {
+    from {
+      opacity: 0;
+      translate: 0 2rem;
+    }
+  }
+
+  /* Keep room for the mini player */
+  @media (min-width: 700px) {
+    body:has(.mini-player) main {
+      padding-inline-end: max(var(--gutter), calc(232px + 2.5rem - (100vw - var(--content)) / 2));
+    }
+  }
+  @media (max-width: 699px) {
+    body:has(.mini-player) {
+      main,
+      .site-footer {
+        padding-block-end: calc(6rem + 200px + 2rem);
+      }
+    }
+  }
+}

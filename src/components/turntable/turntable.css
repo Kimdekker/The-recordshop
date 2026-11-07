@@ -1,0 +1,246 @@
+@layer components {
+  .turntable {
+    container-type: inline-size;
+    margin: 0;
+    inline-size: 100%;
+    max-inline-size: 860px;
+
+    --wood-1: oklch(0.52 0.09 58);
+    --wood-2: oklch(0.36 0.075 48);
+    --vinyl: oklch(0.16 0.005 60);
+  }
+
+  /* Wooden plinth with bevel */
+  .plinth {
+    padding: 3.2cqi;
+    border-radius: 2.4cqi;
+    background:
+      repeating-linear-gradient(91deg, oklch(0.3 0.06 45 / 0.25) 0 1px, transparent 1px 13px),
+      repeating-linear-gradient(89deg, oklch(0.7 0.08 70 / 0.1) 0 2px, transparent 2px 31px),
+      repeating-radial-gradient(ellipse 140% 18% at 30% 120%, transparent 0 18px, oklch(0.25 0.05 45 / 0.18) 19px 21px),
+      linear-gradient(170deg, var(--wood-1), var(--wood-2));
+    box-shadow:
+      inset 0 2px 0 oklch(1 0 0 / 0.25),
+      inset 0 -3px 0 oklch(0 0 0 / 0.35),
+      0 2px 0 oklch(0.25 0.05 45),
+      0 30px 60px -20px oklch(0 0 0 / 0.7),
+      0 10px 20px oklch(0 0 0 / 0.35);
+  }
+
+  .deck {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    border-radius: 1.4cqi;
+    background:
+      radial-gradient(120% 90% at 30% 0%, oklch(0.32 0.01 60), oklch(0.2 0.008 60));
+    box-shadow:
+      inset 0 2px 6px oklch(0 0 0 / 0.6),
+      inset 0 -1px 0 oklch(1 0 0 / 0.08);
+    touch-action: none; /* dragging the arm doesn't scroll the page */
+  }
+
+  /* Metal platter with strobe dots on the rim */
+  .platter {
+    position: absolute;
+    inset-inline-start: 8%;
+    inset-block-start: 7.333%;
+    inline-size: 64%;
+    block-size: 85.333%;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle, transparent 0 92%, oklch(0.2 0 0 / 0.6) 92.5% 93%, transparent 93.5%),
+      repeating-conic-gradient(oklch(0.85 0.01 80) 0 1.2deg, oklch(0.45 0.01 80) 1.2deg 2.4deg),
+      conic-gradient(from 30deg, #9ca3af, #f3f4f6, #6b7280, #e5e7eb, #9ca3af);
+    box-shadow:
+      0 0.8cqi 1.6cqi oklch(0 0 0 / 0.6),
+      inset 0 0 0 0.25cqi oklch(1 0 0 / 0.25);
+  }
+
+  /* The record itself: grooves via repeating gradients */
+  .record {
+    position: absolute;
+    inset-inline-start: 10%;
+    inset-block-start: 10%;
+    inline-size: 60%;
+    block-size: 80%;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle, transparent 0 33.5%, oklch(0.12 0 0) 34% 46%, transparent 46.5%),
+      repeating-radial-gradient(circle, var(--vinyl) 0 0.18cqi, oklch(0.21 0.005 60) 0.18cqi 0.36cqi),
+      var(--vinyl);
+    box-shadow:
+      0 0 0 0.15cqi oklch(0.08 0 0),
+      0 0.4cqi 1cqi oklch(0 0 0 / 0.6);
+    animation: tt-spin 1.8s linear infinite; /* 33⅓ rpm */
+    animation-play-state: paused;
+
+    [data-spinning='true'] & {
+      animation-play-state: running;
+    }
+  }
+
+  .label {
+    position: absolute;
+    inset: 33.333%;
+    border-radius: 50%;
+    overflow: hidden;
+    background: oklch(0.6 0.15 45);
+    box-shadow: 0 0 0 0.3cqi oklch(0.1 0 0 / 0.8);
+
+    img {
+      inline-size: 100%;
+      block-size: 100%;
+      object-fit: cover;
+      scale: 1.02;
+      user-select: none;
+    }
+
+    /* Spindle hole */
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 46%;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #f5f5f4, #78716c 60%, #292524);
+      box-shadow: 0 0 0 0.25cqi oklch(0 0 0 / 0.5);
+    }
+  }
+
+  /* Static highlight: light shining on the vinyl, does not rotate along */
+  .sheen {
+    position: absolute;
+    inset-inline-start: 10%;
+    inset-block-start: 10%;
+    inline-size: 60%;
+    block-size: 80%;
+    border-radius: 50%;
+    pointer-events: none;
+    background:
+      conic-gradient(
+        from 200deg,
+        transparent 0deg,
+        oklch(1 0 0 / 0.1) 20deg,
+        transparent 50deg,
+        transparent 180deg,
+        oklch(1 0 0 / 0.08) 200deg,
+        transparent 230deg
+      );
+    mask: radial-gradient(circle, transparent 0 34%, #000 34.5%);
+  }
+
+  .arm-layer {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  .rings circle {
+    fill: none;
+    stroke: oklch(0.32 0.005 60 / 0.9);
+    stroke-width: 0.9;
+  }
+
+  .arm {
+    pointer-events: auto;
+    cursor: grab;
+    outline: none;
+    transition: transform 0.6s cubic-bezier(0.3, 0.7, 0.2, 1), filter 0.2s;
+    filter: drop-shadow(1.5px 3px 1.5px oklch(0 0 0 / 0.55));
+
+    [data-needle='down'] & {
+      transition: transform 0.25s linear, filter 0.2s;
+    }
+    [data-needle='lifted'] & {
+      cursor: grabbing;
+      transition: none;
+      /* Needle lifted: higher above the record → larger, softer shadow */
+      filter: drop-shadow(6px 12px 5px oklch(0 0 0 / 0.45));
+    }
+    &:focus-visible {
+      filter: drop-shadow(0 0 0 var(--focus)) drop-shadow(0 0 3px var(--focus)) drop-shadow(1.5px 3px 1.5px oklch(0 0 0 / 0.55));
+    }
+  }
+
+  .arm-hit {
+    stroke: transparent;
+    stroke-width: 26;
+    stroke-linecap: round;
+  }
+
+  .needle-dot {
+    fill: var(--accent);
+  }
+
+  /* Start/stop button in hardware style */
+  .motor {
+    position: absolute;
+    inset-inline-start: 3%;
+    inset-block-end: 4%;
+    inline-size: 9.5%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border: 0;
+    font: 600 1.35cqi/1 var(--font-body);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: oklch(0.25 0.01 60);
+    background: radial-gradient(circle at 35% 30%, #fafaf9, #a8a29e 70%, #78716c);
+    box-shadow:
+      0 0.5cqi 0 #57534e,
+      0 0.8cqi 1.2cqi oklch(0 0 0 / 0.5),
+      inset 0 1px 0 #fff;
+    transition: translate 0.08s, box-shadow 0.08s;
+
+    &[aria-pressed='true'] {
+      translate: 0 0.35cqi;
+      box-shadow:
+        0 0.15cqi 0 #57534e,
+        0 0.3cqi 0.6cqi oklch(0 0 0 / 0.5),
+        inset 0 1px 0 #fff;
+      color: oklch(0.45 0.17 40);
+    }
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+
+  .speed {
+    position: absolute;
+    inset-inline-start: 14%;
+    inset-block-end: 6.5%;
+    font: 600 1.8cqi/1 var(--font-body);
+    color: oklch(0.75 0.15 50);
+    text-shadow: 0 0 1cqi oklch(0.75 0.17 50 / 0.8);
+    opacity: 0.35;
+
+    [data-spinning='true'] & {
+      opacity: 1;
+    }
+  }
+
+  .turntable-hint {
+    margin-block-start: 1rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    text-wrap: pretty;
+  }
+
+  @keyframes tt-spin {
+    to {
+      rotate: 360deg;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .record {
+      animation-duration: 12s;
+    }
+    .arm {
+      transition: none !important;
+    }
+  }
+}

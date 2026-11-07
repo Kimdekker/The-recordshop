@@ -1,0 +1,474 @@
+@layer pages {
+  .eyebrow {
+    color: var(--accent);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  /* --- Discover -------------------------------------------------------- */
+  .hero {
+    display: grid;
+    gap: 1rem;
+    padding-block: clamp(1rem, 4vw, 3rem) 1rem;
+
+    h1 {
+      max-inline-size: 18ch;
+    }
+    .lede {
+      max-inline-size: 52ch;
+      color: var(--text-muted);
+      font-size: 1.15rem;
+    }
+    search {
+      margin-block-start: 0.75rem;
+    }
+  }
+
+  /* --- Album page ------------------------------------------------------ */
+  .album-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: clamp(1.5rem, 4vw, 3rem);
+    align-items: end;
+
+    @media (min-width: 760px) {
+      grid-template-columns: minmax(240px, 380px) 1fr;
+    }
+  }
+  .album-cover {
+    inline-size: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 4px;
+    box-shadow:
+      0 1px 0 oklch(1 0 0 / 0.1) inset,
+      0 30px 60px -20px oklch(0 0 0 / 0.8);
+  }
+  .album-intro {
+    --stack-gap: 0.6rem;
+
+    .artist {
+      font: 500 1.35rem/1.2 var(--font-display);
+      color: var(--text-muted);
+    }
+  }
+  .facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.75rem;
+    margin-block: 0.75rem;
+
+    div {
+      display: grid;
+      gap: 0.1rem;
+    }
+    dt {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    dd {
+      margin: 0;
+      font-weight: 600;
+    }
+  }
+  .album-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .reward {
+    font-size: 0.9rem;
+  }
+
+  .album-body {
+    display: grid;
+    gap: clamp(2rem, 5vw, 4rem);
+    margin-block-start: clamp(2.5rem, 6vw, 4rem);
+
+    @media (min-width: 900px) {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    }
+    h2 {
+      margin-block-end: 1rem;
+    }
+  }
+
+  .tracklist {
+    padding: 0;
+    list-style: none;
+    counter-reset: track;
+
+    li {
+      counter-increment: track;
+      display: grid;
+      grid-template-columns: 2rem 1fr auto;
+      gap: 0.75rem;
+      align-items: baseline;
+      padding: 0.6rem 0.25rem;
+      border-block-end: 1px solid var(--line);
+
+      &::before {
+        content: counter(track);
+        color: var(--text-muted);
+        font-variant-numeric: tabular-nums;
+        text-align: end;
+      }
+      &[aria-current='true'] {
+        color: var(--accent);
+
+        &::before {
+          content: '♪';
+          color: var(--accent);
+        }
+      }
+    }
+    .dur {
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+      font-size: 0.9rem;
+    }
+    &.compact li {
+      padding-block: 0.4rem;
+      font-size: 0.9rem;
+    }
+  }
+
+  .review-form,
+  .my-review {
+    margin-block-end: 2rem;
+    padding: 1.25rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--bg-raised);
+  }
+  .my-review {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .review-list {
+    display: grid;
+    gap: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .review {
+    padding-block: 1rem;
+    border-block-end: 1px solid var(--line);
+
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.4rem 0.75rem;
+      margin-block-end: 0.4rem;
+    }
+    .liked {
+      color: var(--danger);
+    }
+    time {
+      margin-inline-start: auto;
+      font-size: 0.85rem;
+    }
+    p {
+      white-space: pre-line;
+    }
+  }
+
+  /* --- Listening ------------------------------------------------------------ */
+  .listen-head {
+    margin-block-end: 1.5rem;
+
+    .by {
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+  }
+  .listen-layout {
+    display: grid;
+    gap: 2rem;
+    align-items: start;
+
+    @media (min-width: 1000px) {
+      grid-template-columns: minmax(0, 1fr) 340px;
+    }
+  }
+  .listen-side {
+    display: grid;
+    gap: 1.1rem;
+    padding: 1.25rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-l);
+    background: var(--bg-raised);
+    box-shadow: var(--shadow);
+
+    @media (min-width: 1000px) {
+      position: sticky;
+      inset-block-start: 5.5rem;
+    }
+  }
+  .track-title {
+    font: 600 1.35rem/1.2 var(--font-display);
+  }
+  .time {
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+  }
+  .earnings {
+    display: grid;
+    gap: 0.4rem;
+    font-size: 0.9rem;
+
+    meter {
+      inline-size: 100%;
+      block-size: 0.6rem;
+    }
+  }
+  .yt-monitor {
+    display: grid;
+    gap: 0.35rem;
+    font-size: 0.75rem;
+  }
+  .yt-screen {
+    /* YouTube: player visible and at least 200×200 */
+    inline-size: 100%;
+    min-inline-size: 200px;
+    min-block-size: 200px;
+    aspect-ratio: 16 / 9;
+    border-radius: var(--radius-s);
+    overflow: hidden;
+    background: #000;
+    box-shadow: inset 0 0 0 1px var(--line);
+
+    iframe {
+      inline-size: 100%;
+      block-size: 100%;
+    }
+  }
+
+  /* --- Login ------------------------------------------------------------- */
+  .auth-card {
+    display: grid;
+    gap: 1rem;
+    max-inline-size: 26rem;
+    margin: clamp(1rem, 6vw, 4rem) auto;
+    padding: clamp(1.5rem, 4vw, 2.5rem);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-l);
+    background: var(--bg-raised);
+    box-shadow: var(--shadow);
+
+    h1 {
+      font-size: 2rem;
+    }
+  }
+  .link-button {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--accent);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    cursor: pointer;
+  }
+
+  /* --- Record collection ---------------------------------------------------- */
+  .wood-shelf {
+    padding: clamp(1rem, 3vw, 2rem);
+    border-radius: var(--radius-l);
+    background:
+      repeating-linear-gradient(90deg, oklch(0.3 0.06 45 / 0.25) 0 1px, transparent 1px 17px),
+      linear-gradient(180deg, oklch(0.38 0.07 50), oklch(0.3 0.06 45));
+    box-shadow:
+      inset 0 2px 0 oklch(1 0 0 / 0.12),
+      inset 0 -6px 12px oklch(0 0 0 / 0.35),
+      var(--shadow);
+
+    .album-card .meta {
+      color: oklch(0.85 0.03 70);
+    }
+  }
+  .empty-shelf {
+    padding: 2rem;
+    border: 1px dashed var(--line);
+    border-radius: var(--radius-l);
+  }
+
+  /* --- Diary --------------------------------------------------------------- */
+  .table-wrap {
+    overflow-x: auto;
+  }
+  .diary-album {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    img {
+      border-radius: 2px;
+      object-fit: cover;
+      flex: none;
+    }
+    a {
+      font-weight: 600;
+    }
+  }
+}
+
+@layer pages {
+  /* --- Album info and credits on the listen page ----------------- */
+  .album-details {
+    display: grid;
+    gap: clamp(2rem, 4vw, 3rem);
+    margin-block-start: clamp(2.5rem, 6vw, 4rem);
+    padding-block-start: clamp(2rem, 4vw, 3rem);
+    border-block-start: 1px solid var(--line);
+
+    @media (min-width: 1000px) {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+      align-items: start;
+    }
+    h2 {
+      margin-block-end: 1rem;
+    }
+    h3 {
+      margin-block: 1.75rem 0.75rem;
+      font: 600 0.8rem/1.2 var(--font-body);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+  }
+
+  .details-now {
+    @media (min-width: 1000px) {
+      position: sticky;
+      inset-block-start: 5.5rem;
+    }
+  }
+
+  .credits {
+    display: grid;
+    gap: 0.45rem;
+
+    div {
+      display: grid;
+      grid-template-columns: minmax(8rem, 11rem) 1fr;
+      gap: 1rem;
+    }
+    dt {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+    dd {
+      margin: 0;
+    }
+  }
+
+  .source {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  .details-album {
+    .facts {
+      margin-block: 1.5rem 1rem;
+    }
+    .label-line {
+      display: block;
+    }
+  }
+
+  .wiki {
+    margin: 0;
+    padding: 0 0 0 1.25rem;
+    border-inline-start: 3px solid var(--accent);
+
+    p {
+      font-size: 1.05rem;
+      line-height: 1.65;
+    }
+    footer {
+      margin-block-start: 0.5rem;
+      font-size: 0.875rem;
+    }
+  }
+
+  .genres {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  .track-credits {
+    display: grid;
+    padding: 0;
+    list-style: none;
+    counter-reset: tc;
+
+    li {
+      counter-increment: tc;
+      border-block-end: 1px solid var(--line);
+    }
+    summary {
+      display: flex;
+      gap: 0.75rem;
+      padding: 0.65rem 0.25rem;
+      cursor: pointer;
+      list-style: none;
+
+      &::-webkit-details-marker {
+        display: none;
+      }
+      &::before {
+        content: counter(tc);
+        inline-size: 1.5rem;
+        color: var(--text-muted);
+        text-align: end;
+        font-variant-numeric: tabular-nums;
+      }
+      &::after {
+        content: '+';
+        margin-inline-start: auto;
+        color: var(--text-muted);
+      }
+      &[aria-current='true'] {
+        color: var(--accent);
+      }
+    }
+    details[open] > summary::after {
+      content: '–';
+    }
+    details > .credits,
+    details > p {
+      padding: 0 0.25rem 1rem 2.25rem;
+    }
+    /* Smooth open/close (interpolate-size in global.css) */
+    details::details-content {
+      block-size: 0;
+      overflow: hidden;
+      transition: block-size 0.25s, content-visibility 0.25s allow-discrete;
+    }
+    details[open]::details-content {
+      block-size: auto;
+    }
+  }
+
+  .ext-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
+    padding: 0;
+    list-style: none;
+  }
+}

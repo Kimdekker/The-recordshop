@@ -4,18 +4,29 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "concurrently -k -n api,web -c magenta,cyan \"node --watch --env-file-if-exists=.env server/index.js\" \"vite\"",
-    "build": "vite build",
-    "start": "NODE_ENV=production node --env-file-if-exists=.env server/index.js"
+    "dev": "concurrently -k -n api,web -c magenta,cyan \"node --watch --env-file-if-exists=.env server/index.ts\" \"vite\"",
+    "build": "tsc && vite build",
+    "typecheck": "tsc",
+    "start": "NODE_ENV=production node --env-file-if-exists=.env server/index.ts"
   },
   "dependencies": {
-    "express": "^4.22.3"
+    "cookie-parser": "^1.4.7",
+    "express": "^4.22.3",
+    "mongoose": "^8.24.8"
   },
   "devDependencies": {
+    "@types/cookie-parser": "^1.4.10",
+    "@types/express": "^4.17.25",
+    "@types/node": "^24.19.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^4.7.0",
     "concurrently": "^9.2.5",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "mongodb-memory-server": "^10.4.3",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-router": "^7.18.5",
+    "typescript": "5.8",
     "vite": "^6.4.5"
   }
 }
