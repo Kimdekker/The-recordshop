@@ -29,8 +29,6 @@ npm run dev            # http://localhost:5173
 
 Without `MONGODB_URI`, development starts an **embedded MongoDB** that keeps its data in `.data/` (the first start downloads the MongoDB binary once, ~70 MB). For Atlas or a local installation, set `MONGODB_URI` in `.env`.
 
-Dev test account (local database only): `devluisteraar` / `recordshop-dev-2026`.
-
 ## How listening is counted
 
 The player sends a heartbeat every 10 seconds (and right before and after a needle jump). The server only counts seconds as "heard" when the position moved forward no faster than the time that actually passed. Needle jumps therefore don't count. Only one turntable can be active per user at a time, and a session pays out only once. Coverage = heard / album length; payout = reward × coverage (with a minimum of 50%).
