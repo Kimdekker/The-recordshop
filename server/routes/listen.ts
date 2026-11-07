@@ -41,17 +41,17 @@ function accrue(session: ListenDoc, album: AlbumDoc, track: number, position: nu
 function readBeat(body: any, album: AlbumDoc) {
   const track = Number(body?.track);
   const position = Number(body?.position);
-  if (!Number.isInteger(track) || track < 0 || track >= album.tracks.length) throw new HttpError(400, 'Ongeldige track');
-  if (!Number.isFinite(position) || position < 0) throw new HttpError(400, 'Ongeldige positie');
+  if (!Number.isInteger(track) || track < 0 || track >= album.tracks.length) throw new HttpError(400, 'Invalid track');
+  if (!Number.isFinite(position) || position < 0) throw new HttpError(400, 'Invalid position');
   return { track, position: Math.min(position, album.tracks[track].duration) };
 }
 
 async function loadSession(id: string, userId: Types.ObjectId) {
-  if (!Types.ObjectId.isValid(id)) throw new HttpError(404, 'Sessie niet gevonden');
+  if (!Types.ObjectId.isValid(id)) throw new HttpError(404, 'Session not found');
   const session = await Listen.findOne({ _id: id, user: userId, ended: false }).lean<ListenDoc>();
-  if (!session) throw new HttpError(404, 'Deze luistersessie is afgelopen');
+  if (!session) throw new HttpError(404, 'This listening session has ended');
   const album = await Album.findById(session.album).lean<AlbumDoc>();
-  if (!album) throw new HttpError(404, 'Album niet gevonden');
+  if (!album) throw new HttpError(404, 'Album not found');
   return { session, album };
 }
 
@@ -111,7 +111,7 @@ listen.post(
       { _id: session._id, ended: false },
       { $set: { ended: true, heard: heardTotal, coverage, tokensAwarded, finishedAt: qualified ? now : null } },
     );
-    if (!closed) throw new HttpError(409, 'Deze sessie is al afgerekend');
+    if (!closed) throw new HttpError(409, 'This session has already been settled');
 
     let balance = user.tokens;
     if (qualified) {

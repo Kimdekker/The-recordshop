@@ -37,7 +37,8 @@ The player sends a heartbeat every 10 seconds (and right before and after a need
 
 ## YouTube
 
-- Quota: search costs 100 units (out of 10,000 per day) and is cached for a week in MongoDB. Importing an album costs about 3 units, and after that the album lives in the database.
+- Quota: search costs 100 units (out of 10,000 per day) and is cached for a week in MongoDB. Importing an album costs about 3 units, and after that the album lives in the database. Playback, Discover shelves and album pages cost nothing.
+- Starter catalog: in development the server fills the catalog in the background with a list of well-known albums (`server/lib/seed.ts`), about 120 units per album, once. Progress is stored, so restarts don't spend quota again. In production it only runs with `SEED_CATALOGUE=1`.
 - YouTube's rules require the video player to stay **visible** (at least 200×200). That's why it sits next to the turntable as a small "monitor".
 - Albums only: search results are filtered (no live sets, compilations or lyrics playlists), and an import must have at least 4 playable tracks and 15 minutes of music.
 

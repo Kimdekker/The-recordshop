@@ -2,71 +2,82 @@ import { NavLink, Outlet, Link, ScrollRestoration } from 'react-router';
 import { useAuth } from '../context/auth.tsx';
 import TokenBadge from './TokenBadge.tsx';
 import MiniPlayer from './MiniPlayer.tsx';
+import Icon, { type IconName } from './Icon.tsx';
 import { ListeningProvider } from '../context/listening.tsx';
 
+function NavItem({ to, icon, label, end }: { to: string; icon: IconName; label: string; end?: boolean }) {
+  return (
+    <li>
+      <NavLink to={to} end={end} viewTransition>
+        <Icon name={icon} />
+        <span className="nav-label">{label}</span>
+      </NavLink>
+    </li>
+  );
+}
+
 export default function Layout() {
-  const { user, logout } = useAuth();
+  const { user, loading, logout } = useAuth();
   return (
     // ListeningProvider sits here (above <Outlet />), so the record keeps playing between pages.
     <ListeningProvider>
       <ScrollRestoration />
       <a className="skip-link" href="#main">
-        Naar de inhoud
+        Skip to content
       </a>
-      <header className="site-header">
-        <div className="inner">
-          <Link to="/" className="brand" viewTransition>
-            <span className="disc" aria-hidden="true" />
-            The Recordshop
-          </Link>
-          <nav className="main-nav" aria-label="Hoofdmenu">
-            <ul>
-              <li>
-                <NavLink to="/" end viewTransition>
-                  Ontdekken
-                </NavLink>
-              </li>
-              {user && (
-                <>
-                  <li>
-                    <NavLink to="/kast" viewTransition>
-                      Mijn platenkast
-                    </NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/dagboek" viewTransition>
-                      Dagboek
-                    </NavLink>
-                  </li>
-                </>
-              )}
-            </ul>
-          </nav>
-          <div className="account">
-            {user ? (
+
+      {/* Floating sidebar (wide), icon rail (medium) or floating bar at the top (phone). */}
+      <header className="sidebar">
+        <Link to="/" className="brand" viewTransition>
+          <span className="disc" aria-hidden="true" />
+          <span className="nav-label">The Recordshop</span>
+        </Link>
+
+        <nav className="main-nav" aria-label="Main menu">
+          <ul>
+            <NavItem to="/" end icon="discover" label="Discover" />
+            {user && (
               <>
-                <TokenBadge tokens={user.tokens} />
-                <span className="muted username" translate="no">
+                <NavItem to="/collection" icon="shelf" label="My Collection" />
+                <NavItem to="/diary" icon="diary" label="Diary" />
+              </>
+            )}
+          </ul>
+        </nav>
+
+        <div className="account">
+          {loading ? null : user ? (
+            <>
+              <TokenBadge tokens={user.tokens} />
+              <p className="who">
+                <Icon name="user" />
+                <span className="nav-label" translate="no">
+                  <span className="visually-hidden">Logged in as </span>
                   {user.username}
                 </span>
-                <button type="button" className="btn btn-ghost btn-small" onClick={logout}>
-                  Uitloggen
-                </button>
-              </>
-            ) : (
-              <Link to="/inloggen" className="btn btn-primary btn-small">
-                Inloggen
-              </Link>
-            )}
-          </div>
+              </p>
+              <button type="button" className="side-action" onClick={logout}>
+                <Icon name="logout" />
+                <span className="nav-label">Log out</span>
+              </button>
+            </>
+          ) : (
+            <Link to="/login" className="side-action primary">
+              <Icon name="login" />
+              <span className="nav-label">Log in</span>
+            </Link>
+          )}
         </div>
       </header>
-      <main id="main" tabIndex={-1}>
-        <Outlet />
-      </main>
-      <footer className="site-footer">
-        <p>The Recordshop: hele albums, van begin tot eind. Muziek via YouTube.</p>
-      </footer>
+
+      <div className="page">
+        <main id="main" tabIndex={-1}>
+          <Outlet />
+        </main>
+        <footer className="site-footer">
+          <p>The Recordshop: whole albums, start to finish. Music via YouTube.</p>
+        </footer>
+      </div>
       <MiniPlayer />
     </ListeningProvider>
   );

@@ -352,7 +352,7 @@ export function ListeningProvider({ children }: { children: ReactNode }) {
 
 export function useListening() {
   const ctx = use(ListeningContext);
-  if (!ctx) throw new Error('useListening buiten ListeningProvider');
+  if (!ctx) throw new Error('useListening outside ListeningProvider');
   return ctx;
 }
 
@@ -360,8 +360,17 @@ export function useListening() {
  * Marks where the YouTube player should appear. The player itself (one
  * iframe for the whole app) is positioned over it.
  */
-export function PlayerSlot({ fixed = false, className }: { fixed?: boolean; className?: string }) {
-  const ref = useRef<HTMLDivElement>(null);
+export function PlayerSlot({
+  fixed = false,
+  className,
+  to,
+}: {
+  fixed?: boolean;
+  className?: string;
+  /** Makes the whole player a link (the iframe itself takes no clicks). */
+  to?: string;
+}) {
+  const ref = useRef<HTMLElement>(null);
   const { setSlot } = useListening();
   useLayoutEffect(() => {
     const el = ref.current!;
@@ -369,7 +378,12 @@ export function PlayerSlot({ fixed = false, className }: { fixed?: boolean; clas
     // Only clear if no other slot has taken over in the meantime.
     return () => setSlot((cur) => (cur?.el === el ? null : cur));
   }, [fixed, setSlot]);
-  return <div ref={ref} className={className} />;
+  if (to)
+    return (
+      // Mouse shortcut only; the album title in the mini player is the accessible link.
+      <Link ref={ref as RefObject<HTMLAnchorElement>} to={to} viewTransition className={className} tabIndex={-1} aria-hidden="true" />
+    );
+  return <div ref={ref as RefObject<HTMLDivElement>} className={className} />;
 }
 
 /** The one YouTube iframe; follows the active slot (or hides). */
@@ -422,32 +436,32 @@ function ResultDialog({
     <dialog ref={dialogRef} className="modal" aria-labelledby="result-title">
       {result && album && (
         <>
-          <h2 id="result-title">{result.qualified ? 'Kant uit!' : 'Plaat eraf gehaald'}</h2>
+          <h2 id="result-title">{result.qualified ? 'Side over!' : 'Record taken off'}</h2>
           {result.qualified ? (
             <>
               <p className="big-number">+{fmtTokens(result.tokensAwarded)}</p>
               <p>
-                tokens voor {album.title}. Je hoorde {Math.round(result.coverage * 100)}% van het album
-                {result.tokensAwarded < result.potentialTokens && ` (maximaal ${fmtTokens(result.potentialTokens)})`}.
+                tokens for {album.title}. You heard {Math.round(result.coverage * 100)}% of the album
+                {result.tokensAwarded < result.potentialTokens && ` (out of a possible ${fmtTokens(result.potentialTokens)})`}.
               </p>
             </>
           ) : (
             <p>
-              Je hoorde {Math.round(result.coverage * 100)}% van het album. Pas vanaf de helft verdien je tokens. Volgende keer
-              het hele verhaal?
+              You heard {Math.round(result.coverage * 100)}% of the album. You only earn tokens once you've heard at least half.
+              The whole story next time?
             </p>
           )}
-          <p className="muted">Saldo: {fmtTokens(result.balance)} tokens</p>
+          <p className="muted">Balance: {fmtTokens(result.balance)} tokens</p>
           <form method="dialog" className="actions">
             {result.qualified && (
               <Link className="btn btn-primary" to={`/album/${album.id}#reviews`} onClick={() => dialogRef.current?.close()}>
-                Schrijf een recensie
+                Write a review
               </Link>
             )}
             <Link className="btn" to="/" onClick={() => dialogRef.current?.close()}>
-              Volgend album ontdekken
+              Discover your next album
             </Link>
-            <button className="btn btn-ghost">Sluiten</button>
+            <button className="btn btn-ghost">Close</button>
           </form>
         </>
       )}

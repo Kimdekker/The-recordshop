@@ -75,42 +75,42 @@ function roleLabel(type: string, attrs: string[] = []) {
   const a = attrs.filter((x) => !['additional', 'assistant'].includes(x));
   switch (type) {
     case 'producer':
-      return a.includes('executive') ? 'Executive producer' : a.includes('co') ? 'Coproductie' : 'Productie';
+      return a.includes('executive') ? 'Executive producer' : a.includes('co') ? 'Co-producer' : 'Producer';
     case 'engineer':
     case 'audio':
-      return 'Techniek';
+      return 'Engineer';
     case 'sound':
-      return 'Geluid';
+      return 'Sound';
     case 'recording':
-      return 'Opname';
+      return 'Recording';
     case 'mix':
       return 'Mix';
     case 'mastering':
       return 'Mastering';
     case 'programming':
-      return 'Programmering';
+      return 'Programming';
     case 'arranger':
     case 'instrument arranger':
     case 'vocal arranger':
-      return 'Arrangement';
+      return 'Arranger';
     case 'instrument':
       return a.length ? cap(a.join(', ')) : 'Instrument';
     case 'vocal':
-      if (a.includes('lead vocals')) return 'Leadzang';
-      if (a.includes('background vocals')) return 'Achtergrondzang';
-      return a.length ? cap(a.join(', ')) : 'Zang';
+      if (a.includes('lead vocals')) return 'Lead vocals';
+      if (a.includes('background vocals')) return 'Background vocals';
+      return a.length ? cap(a.join(', ')) : 'Vocals';
     case 'performer':
-      return a.includes('guest') ? 'Gastartiest' : 'Uitvoering';
+      return a.includes('guest') ? 'Featured artist' : 'Performer';
     case 'composer':
-      return 'Muziek';
+      return 'Composer';
     case 'lyricist':
-      return 'Tekst';
+      return 'Lyricist';
     case 'writer':
-      return 'Geschreven door';
+      return 'Written by';
     case 'conductor':
-      return 'Dirigent';
+      return 'Conductor';
     case 'orchestra':
-      return 'Orkest';
+      return 'Orchestra';
     case 'remixer':
       return 'Remix';
     default:
@@ -119,17 +119,17 @@ function roleLabel(type: string, attrs: string[] = []) {
 }
 
 const ROLE_ORDER = [
-  'Leadzang',
-  'Zang',
-  'Gastartiest',
-  'Uitvoering',
-  'Productie',
-  'Coproductie',
+  'Lead vocals',
+  'Vocals',
+  'Featured artist',
+  'Performer',
+  'Producer',
+  'Co-producer',
   'Executive producer',
-  'Geschreven door',
-  'Tekst',
-  'Muziek',
-  'Arrangement',
+  'Written by',
+  'Lyricist',
+  'Composer',
+  'Arranger',
 ];
 
 function collect(relations: any[] = [], includeWorks = true): Credit[] {
@@ -174,7 +174,7 @@ async function wikipedia(wikidataUrl: string | undefined) {
   if (!qid) return undefined;
   const entity = await getJson(`https://www.wikidata.org/wiki/Special:EntityData/${qid}.json`);
   const links = entity && (Object.values(entity.entities)[0] as any)?.sitelinks;
-  for (const lang of ['nl', 'en']) {
+  for (const lang of ['en']) {
     const title = links?.[`${lang}wiki`]?.title;
     if (!title) continue;
     const s = await getJson(`https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`);
@@ -189,7 +189,7 @@ async function wikipedia(wikidataUrl: string | undefined) {
 const LINK_TYPES: Record<string, string> = {
   discogs: 'Discogs',
   allmusic: 'AllMusic',
-  review: 'Recensie',
+  review: 'Review',
   'discography entry': 'Last.fm',
   lyrics: 'Lyrics (Genius)',
 };
@@ -209,7 +209,7 @@ export async function fetchAlbumMeta(album: AlbumDoc): Promise<AlbumMeta> {
   for (const u of urlRels) {
     const label = LINK_TYPES[u.type];
     // Reviews may appear more than once; other sources once.
-    if (label && !links.some((l) => l.url === u.url.resource || (l.label === label && label !== 'Recensie')))
+    if (label && !links.some((l) => l.url === u.url.resource || (l.label === label && label !== 'Review')))
       links.push({ label, url: u.url.resource });
   }
   const wiki = await wikipedia(urlRels.find((u) => u.type === 'wikidata')?.url.resource);

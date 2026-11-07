@@ -25,15 +25,15 @@ const MIN_TRACKS = 5;
 const MAX_TRACKS = 40;
 
 async function yt<T = any>(endpoint: string, params: Record<string, string | number>): Promise<T> {
-  if (!env.youtubeKey) throw new HttpError(500, 'YOUTUBE_API_KEY ontbreekt in .env');
+  if (!env.youtubeKey) throw new HttpError(500, 'YOUTUBE_API_KEY is missing from .env');
   const url = new URL(`${BASE}/${endpoint}`);
   for (const [k, v] of Object.entries({ ...params, key: env.youtubeKey })) url.searchParams.set(k, String(v));
   const res = await fetch(url);
   const body = (await res.json()) as any;
   if (!res.ok) {
     const reason = body?.error?.errors?.[0]?.reason;
-    if (reason === 'quotaExceeded') throw new HttpError(429, 'Het dagelijkse YouTube-quotum is op. Morgen weer!');
-    if (res.status === 404 || reason === 'playlistNotFound') throw new HttpError(404, 'Album niet gevonden op YouTube');
+    if (reason === 'quotaExceeded') throw new HttpError(429, "The daily YouTube quota is used up. Back tomorrow!");
+    if (res.status === 404 || reason === 'playlistNotFound') throw new HttpError(404, 'Album not found on YouTube');
     throw new HttpError(502, body?.error?.message ?? `YouTube API ${res.status}`);
   }
   return body as T;
@@ -346,7 +346,7 @@ const MAX_DURATION = 3 * 60 * 60;
 export async function importAlbum(playlistId: string): Promise<AlbumDoc> {
   const meta = await yt('playlists', { part: 'snippet', id: playlistId });
   const pl = meta.items?.[0];
-  if (!pl) throw new HttpError(404, 'Album niet gevonden op YouTube');
+  if (!pl) throw new HttpError(404, 'Album not found on YouTube');
 
   const items: any[] = [];
   let pageToken: string | undefined;
@@ -360,7 +360,7 @@ export async function importAlbum(playlistId: string): Promise<AlbumDoc> {
     items.push(...page.items);
     pageToken = page.nextPageToken;
   } while (pageToken && items.length < MAX_TRACKS + 10);
-  if (items.length > MAX_TRACKS) throw new HttpError(422, 'Dit lijkt geen album: te veel nummers.');
+  if (items.length > MAX_TRACKS) throw new HttpError(422, "This doesn't look like an album: too many tracks.");
 
   const ids = items.map((i) => i.contentDetails.videoId);
   const videos = new Map<string, any>();
@@ -379,7 +379,7 @@ export async function importAlbum(playlistId: string): Promise<AlbumDoc> {
     (isVevo(o) && compact(o).includes(compact(artist).slice(0, 6))) ||
     norm(o) === norm(artist);
   const officialShare = owners.filter(official).length / Math.max(1, owners.length);
-  if (officialShare < OFFICIAL_SHARE) throw new HttpError(422, 'Dit is geen officiële release van de artiest.');
+  if (officialShare < OFFICIAL_SHARE) throw new HttpError(422, "This isn't an official release by the artist.");
 
   const tracks: Track[] = [];
   let views = 0;
@@ -394,8 +394,8 @@ export async function importAlbum(playlistId: string): Promise<AlbumDoc> {
 
   const totalDuration = tracks.reduce((s, t) => s + t.duration, 0);
   if (tracks.length < MIN_TRACKS - 1 || totalDuration < MIN_DURATION)
-    throw new HttpError(422, 'Dit lijkt geen volledig album (te weinig afspeelbare nummers).');
-  if (totalDuration > MAX_DURATION) throw new HttpError(422, 'Dit lijkt geen album: veel te lang.');
+    throw new HttpError(422, "This doesn't look like a complete album (too few playable tracks).");
+  if (totalDuration > MAX_DURATION) throw new HttpError(422, "This doesn't look like an album: way too long.");
 
   const firstVideo = videos.get(tracks[0].videoId);
   const yearMatch = /\b(19[5-9]\d|20[0-3]\d)\b/.exec(pl.snippet.title + ' ' + (pl.snippet.description ?? ''));
@@ -422,7 +422,7 @@ export async function importAlbum(playlistId: string): Promise<AlbumDoc> {
 }
 
 export async function getOrImportAlbum(id: string): Promise<AlbumDoc> {
-  if (!/^[\w-]{10,64}$/.test(id)) throw new HttpError(400, 'Ongeldig album-ID');
+  if (!/^[\w-]{10,64}$/.test(id)) throw new HttpError(400, 'Invalid album ID');
   const existing = await Album.findById(id).lean<AlbumDoc>();
   if (existing?.version === ALBUM_VERSION) return existing;
   if (!existing) return importAlbum(id);

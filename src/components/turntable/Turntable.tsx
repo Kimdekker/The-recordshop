@@ -91,10 +91,10 @@ export default function Turntable(props: TurntableProps) {
   const elapsedAtAngle = (deg: number) => radiusToProgress(radiusAt(deg)) * total;
 
   function describe(sec: number) {
-    if (needle === 'rest' && drag === null) return 'Toonarm in rust';
+    if (needle === 'rest' && drag === null) return 'Tonearm at rest';
     const { track, position } = locate(tracks, sec);
     const t = tracks[track];
-    return `Nummer ${track + 1} van ${tracks.length}: ${t.title}, ${fmtTime(position)} van ${fmtTime(t.duration)}`;
+    return `Track ${track + 1} of ${tracks.length}: ${t.title}, ${fmtTime(position)} of ${fmtTime(t.duration)}`;
   }
 
   function pointerAngle(e: PointerEvent) {
@@ -201,7 +201,7 @@ export default function Turntable(props: TurntableProps) {
               style={{ transform: `rotate(${angle}deg)`, transformOrigin: `${PIVOT.x}px ${PIVOT.y}px` }}
               role="slider"
               tabIndex={0}
-              aria-label="Toonarm: sleep of gebruik de pijltjestoetsen om de naald te verplaatsen"
+              aria-label="Tonearm: drag or use the arrow keys to move the needle"
               aria-describedby={hintId}
               aria-valuemin={0}
               aria-valuemax={Math.round(total)}
@@ -242,10 +242,11 @@ export default function Turntable(props: TurntableProps) {
           <span className="speed" aria-hidden="true">33⅓</span>
         </div>
       </div>
-      <figcaption id={hintId} className="turntable-hint">
+      {/* While playing only for screen readers (keyboard explanation of the arm); visible when the arm rests. */}
+      <figcaption id={hintId} className={needle === 'rest' ? 'turntable-hint' : 'visually-hidden'}>
         {needle === 'rest'
-          ? `De arm rust. Sleep hem terug op de plaat om ${title} verder te luisteren (of focus de arm en druk op Enter).`
-          : 'Til de naald op en zet hem ergens anders neer om te verspringen. Wie verspringt, hoort minder en verdient minder tokens.'}
+          ? `The arm is resting. Drag it back onto the record to keep listening to ${title} (or focus the arm and press Enter).`
+          : 'Drag the arm, or use the arrow keys, to skip ahead or back.'}
       </figcaption>
     </figure>
   );

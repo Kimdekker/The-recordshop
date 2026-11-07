@@ -10,7 +10,7 @@ import { env } from './env.ts';
 export async function connectDb() {
   let uri = env.mongoUri;
   if (!uri) {
-    if (env.production) throw new Error('MONGODB_URI is verplicht in productie');
+    if (env.production) throw new Error('MONGODB_URI is required in production');
     const { MongoMemoryServer } = await import('mongodb-memory-server');
     const dbPath = path.resolve(import.meta.dirname, '../../.data/db');
     await mkdir(dbPath, { recursive: true });
@@ -25,8 +25,8 @@ export async function connectDb() {
     };
     process.once('SIGINT', stop);
     process.once('SIGTERM', stop);
-    console.log(`[db] ingebouwde MongoDB in .data/db`);
+    console.log(`[db] embedded MongoDB in .data/db`);
   }
   await mongoose.connect(uri);
-  console.log('[db] verbonden');
+  console.log('[db] connected');
 }

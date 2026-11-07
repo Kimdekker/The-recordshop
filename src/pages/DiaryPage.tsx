@@ -9,26 +9,26 @@ export default function DiaryPage() {
   return (
     <section aria-labelledby="diary-title">
       <div className="section-head">
-        <h1 id="diary-title">Dagboek</h1>
-        <p>Elk album dat je helemaal hebt geluisterd.</p>
+        <h1 id="diary-title">Diary</h1>
+        <p>Every album you've listened to all the way through.</p>
       </div>
-      {loading && <p role="status">Bladeren…</p>}
+      {loading && <p role="status">Flipping through…</p>}
       {error && (
         <p className="notice error" role="alert">
           {error.message}
         </p>
       )}
-      {data && !data.entries.length && <p className="muted">Nog niets geluisterd. Je eerste plaat wacht.</p>}
+      {data && !data.entries.length && <p className="muted">Nothing played yet. Your first record is waiting.</p>}
       {data && data.entries.length > 0 && (
         <div className="table-wrap">
           <table className="table diary">
-            <caption className="visually-hidden">Luistergeschiedenis, nieuwste eerst</caption>
+            <caption className="visually-hidden">Listening history, newest first</caption>
             <thead>
               <tr>
-                <th scope="col">Datum</th>
+                <th scope="col">Date</th>
                 <th scope="col">Album</th>
-                <th scope="col">Beoordeling</th>
-                <th scope="col">Gehoord</th>
+                <th scope="col">Rating</th>
+                <th scope="col">Heard</th>
                 <th scope="col">Tokens</th>
               </tr>
             </thead>
@@ -45,7 +45,7 @@ export default function DiaryPage() {
                         <Link to={`/album/${e.album.id}`}>{e.album.title}</Link>
                         <div className="muted">
                           {e.album.artist}
-                          {e.isRepeat && ' · opnieuw'}
+                          {e.isRepeat && ' · repeat'}
                         </div>
                       </div>
                     </div>

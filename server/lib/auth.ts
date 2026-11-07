@@ -53,6 +53,6 @@ export async function loadUser(req: Request, _res: Response, next: NextFunction)
 }
 
 export function requireUser(req: Request) {
-  if (!req.user) throw new HttpError(401, 'Log in om dit te doen');
+  if (!req.user) throw new HttpError(401, 'Log in to do this');
   return req.user;
 }

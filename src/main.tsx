@@ -16,21 +16,23 @@ import DiaryPage from './pages/DiaryPage.tsx';
 import Login from './pages/Login.tsx';
 import ArtistPage from './pages/ArtistPage.tsx';
 import NotFound from './pages/NotFound.tsx';
+import ShelfPage from './pages/ShelfPage.tsx';
 
 const router = createBrowserRouter([
   {
     element: <Layout />,
     children: [
       { index: true, element: <Discover /> },
+      { path: 'discover/:shelf', element: <ShelfPage /> },
       { path: 'album/:id', element: <AlbumPage /> },
-      { path: 'luisteren/:id', element: <ListenPage /> },
-      { path: 'artiest/:name', element: <ArtistPage /> },
-      { path: 'inloggen', element: <Login /> },
+      { path: 'listen/:id', element: <ListenPage /> },
+      { path: 'artist/:name', element: <ArtistPage /> },
+      { path: 'login', element: <Login /> },
       {
         element: <RequireUser />,
         children: [
-          { path: 'kast', element: <CollectionPage /> },
-          { path: 'dagboek', element: <DiaryPage /> },
+          { path: 'collection', element: <CollectionPage /> },
+          { path: 'diary', element: <DiaryPage /> },
         ],
       },
       { path: '*', element: <NotFound /> },

@@ -6,7 +6,7 @@ export function Stars({ rating, size }: { rating: number; size?: string }) {
     <span
       className="stars"
       role="img"
-      aria-label={`${fmtRating(rating)} van 5 sterren`}
+      aria-label={`${fmtRating(rating)} out of 5 stars`}
       style={{ '--rating': rating, ...(size ? { '--size': size } : {}) } as CSSProperties}
     />
   );
@@ -19,7 +19,7 @@ export function StarInput({
   name,
   value,
   onChange,
-  legend = 'Jouw beoordeling',
+  legend = 'Your rating',
 }: {
   name: string;
   value: number | null;
@@ -47,15 +47,15 @@ export function StarInput({
                 onBlur={() => setFocused(false)}
                 required
               />
-              <label htmlFor={id} className={Number.isInteger(v) ? 'right' : 'left'} title={`${fmtRating(v)} sterren`}>
-                <span className="visually-hidden">{fmtRating(v)} sterren</span>
+              <label htmlFor={id} className={Number.isInteger(v) ? 'right' : 'left'} title={`${fmtRating(v)} stars`}>
+                <span className="visually-hidden">{fmtRating(v)} stars</span>
               </label>
             </Fragment>
           );
         })}
       </div>
       <output className="star-value" aria-hidden="true">
-        {value ? `${fmtRating(value)} / 5` : 'Nog geen sterren'}
+        {value ? `${fmtRating(value)} / 5` : 'No stars yet'}
       </output>
     </fieldset>
   );

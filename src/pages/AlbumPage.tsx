@@ -15,16 +15,16 @@ export default function AlbumPage() {
   const reviews = useAsync(() => api.reviews(id).then((r) => r.reviews), [id]);
   const [buyState, setBuyState] = useState<{ error?: string; done?: boolean; busy?: boolean }>({});
 
-  if (album.loading && !album.data) return <p role="status">Album uit de bak halen…</p>;
+  if (album.loading && !album.data) return <p role="status">Pulling the album from the crate…</p>;
   if (album.error)
     return (
       <div className="stack">
-        <h1>Hier ligt geen plaat</h1>
+        <h1>No record here</h1>
         <p className="notice error" role="alert">
           {album.error.message}
         </p>
         <p>
-          <Link to="/">Terug naar ontdekken</Link>
+          <Link to="/">Back to Discover</Link>
         </p>
       </div>
     );
@@ -49,7 +49,7 @@ export default function AlbumPage() {
           <img
             className="album-cover"
             src={a.cover}
-            alt={`Hoes van ${a.title}`}
+            alt={`Cover of ${a.title}`}
             style={{ viewTransitionName: `cover-${a.id.replace(/[^\w-]/g, '')}` }}
           />
         )}
@@ -62,54 +62,54 @@ export default function AlbumPage() {
           <dl className="facts">
             {a.year && (
               <div>
-                <dt>Jaar</dt>
+                <dt>Year</dt>
                 <dd>{a.year}</dd>
               </div>
             )}
             <div>
-              <dt>Nummers</dt>
+              <dt>Tracks</dt>
               <dd>{a.trackCount}</dd>
             </div>
             <div>
-              <dt>Speelduur</dt>
+              <dt>Length</dt>
               <dd>{fmtMinutes(a.totalDuration)}</dd>
             </div>
             <div>
-              <dt>Beoordeling</dt>
+              <dt>Rating</dt>
               <dd>
                 {a.ratingAvg != null ? (
                   <>
                     <Stars rating={a.ratingAvg} /> <span className="muted">({a.ratingCount})</span>
                   </>
                 ) : (
-                  <span className="muted">nog geen</span>
+                  <span className="muted">none yet</span>
                 )}
               </dd>
             </div>
             <div>
-              <dt>Helemaal geluisterd</dt>
+              <dt>Full listens</dt>
               <dd>{a.listenCount}×</dd>
             </div>
           </dl>
 
           <div className="album-actions">
-            <Link className="btn btn-primary" to={`/luisteren/${a.id}`} viewTransition>
-              Leg de plaat op
+            <Link className="btn btn-primary" to={`/listen/${a.id}`} viewTransition>
+              Play the record
             </Link>
             {user &&
               (owned ? (
-                <span className="badge gold">In je platenkast</span>
+                <span className="badge gold">In your collection</span>
               ) : (
                 <button className="btn" type="button" onClick={buy} disabled={buyState.busy || user.tokens < a.price}>
-                  Koop voor {fmtTokens(a.price)} tokens
+                  Buy for {fmtTokens(a.price)} tokens
                 </button>
               ))}
           </div>
           <p className="reward muted">
             {a.me?.listens
-              ? `Je hebt dit album ${a.me.listens}× helemaal geluisterd. Nog een keer levert tot ${a.reward.repeat} tokens op.`
-              : `Helemaal luisteren levert tot ${a.reward.first} tokens op.`}
-            {user && !owned && user.tokens < a.price && ` Je hebt nog ${fmtTokens(a.price - user.tokens)} tokens nodig om hem te kopen.`}
+              ? `You've listened to this album all the way through ${a.me.listens}×. Another listen earns up to ${a.reward.repeat} tokens.`
+              : `Listening all the way through earns up to ${a.reward.first} tokens.`}
+            {user && !owned && user.tokens < a.price && ` You need ${fmtTokens(a.price - user.tokens)} more tokens to buy it.`}
           </p>
           {buyState.error && (
             <p className="notice error" role="alert">
@@ -118,7 +118,7 @@ export default function AlbumPage() {
           )}
           {buyState.done && (
             <p className="notice success" role="status">
-              Gekocht! {a.title} staat nu in je platenkast.
+              Bought! {a.title} is now in your collection.
             </p>
           )}
         </div>
@@ -126,7 +126,7 @@ export default function AlbumPage() {
 
       <div className="album-body">
         <section aria-labelledby="tracks-title">
-          <h2 id="tracks-title">Kant A tot het einde</h2>
+          <h2 id="tracks-title">Side A to the end</h2>
           <ol className="tracklist">
             {a.tracks.map((t) => (
               <li key={t.videoId}>
@@ -138,7 +138,7 @@ export default function AlbumPage() {
         </section>
 
         <section aria-labelledby="reviews-title" id="reviews">
-          <h2 id="reviews-title">Recensies</h2>
+          <h2 id="reviews-title">Reviews</h2>
           <MyReview album={a} onSaved={() => (reviews.reload(), album.reload())} />
           {reviews.data?.length ? (
             <ul className="review-list">
@@ -147,7 +147,7 @@ export default function AlbumPage() {
               ))}
             </ul>
           ) : (
-            <p className="muted">Nog geen recensies. Wees de eerste, na een volledige luisterbeurt.</p>
+            <p className="muted">No reviews yet. Be the first, after a full listen.</p>
           )}
         </section>
       </div>
@@ -163,7 +163,7 @@ function ReviewItem({ review: r }: { review: Review }) {
           <strong translate="no">{r.username}</strong>
           <Stars rating={r.rating} size="0.95em" />
           {r.liked && (
-            <span className="liked" role="img" aria-label="vindt dit een favoriet">
+            <span className="liked" role="img" aria-label="marked as a favorite">
               ♥
             </span>
           )}
@@ -189,28 +189,28 @@ function MyReview({ album, onSaved }: { album: AlbumDetail; onSaved: () => void 
   if (!user)
     return (
       <p className="muted">
-        <Link to="/inloggen">Log in</Link> om na het luisteren een recensie te schrijven.
+        <Link to="/login">Log in</Link> to write a review after listening.
       </p>
     );
   if (!album.me?.listens)
-    return <p className="notice">Luister het album eerst helemaal, dan kun je het beoordelen. Zo weet je het hele verhaal.</p>;
+    return <p className="notice">Listen to the whole album first, then you can rate it. That way you know the whole story.</p>;
 
   if (existing && !editing)
     return (
       <div className="my-review">
         <p>
-          Jij gaf dit album <Stars rating={existing.rating} /> ({fmtRating(existing.rating)})
-          {existing.liked && ' en een hartje'}.
+          You gave this album <Stars rating={existing.rating} /> ({fmtRating(existing.rating)})
+          {existing.liked && ' and a heart'}.
         </p>
         <button className="btn btn-small btn-ghost" type="button" onClick={() => setEditing(true)}>
-          Recensie aanpassen
+          Edit review
         </button>
       </div>
     );
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
-    if (!rating) return setStatus({ error: 'Kies eerst een aantal sterren.' });
+    if (!rating) return setStatus({ error: 'Pick a star rating first.' });
     setStatus({ busy: true });
     try {
       await api.saveReview(album.id, { rating, text, liked });
@@ -224,21 +224,21 @@ function MyReview({ album, onSaved }: { album: AlbumDetail; onSaved: () => void 
 
   return (
     <form className="review-form stack" onSubmit={onSubmit} aria-labelledby="my-review-title">
-      <h3 id="my-review-title">{existing ? 'Pas je recensie aan' : 'Wat vond je ervan?'}</h3>
+      <h3 id="my-review-title">{existing ? 'Edit your review' : 'What did you think?'}</h3>
       <StarInput name="rating" value={rating} onChange={setRating} />
       <label className="checkbox">
         <input type="checkbox" checked={liked} onChange={(e) => setLiked(e.target.checked)} />
-        Favoriet ♥
+        Favorite ♥
       </label>
       <div className="field">
-        <label htmlFor="review-text">Recensie (optioneel)</label>
+        <label htmlFor="review-text">Review (optional)</label>
         <textarea
           id="review-text"
           className="textarea"
           value={text}
           onChange={(e) => setText(e.target.value)}
           maxLength={5000}
-          placeholder="Welk verhaal vertelt dit album? Welk nummer bleef hangen?"
+          placeholder="What story does this album tell? Which track stuck with you?"
         />
       </div>
       {status.error && (
@@ -248,11 +248,11 @@ function MyReview({ album, onSaved }: { album: AlbumDetail; onSaved: () => void 
       )}
       <div className="album-actions">
         <button className="btn btn-primary" type="submit" disabled={status.busy}>
-          Opslaan
+          Save
         </button>
         {existing && (
           <button className="btn btn-ghost" type="button" onClick={() => setEditing(false)}>
-            Annuleren
+            Cancel
           </button>
         )}
       </div>

@@ -28,13 +28,13 @@ export default function Login() {
   const isLogin = mode === 'login';
   return (
     <section className="auth-card" aria-labelledby="auth-title">
-      <h1 id="auth-title">{isLogin ? 'Welkom terug' : 'Word lid'}</h1>
+      <h1 id="auth-title">{isLogin ? 'Welcome back' : 'Join The Recordshop'}</h1>
       <p className="muted">
-        {isLogin ? 'Log in om platen op te leggen en tokens te verdienen.' : 'Maak een account en begin je platenkast.'}
+        {isLogin ? 'Log in to play records and earn tokens.' : 'Create an account and start your collection.'}
       </p>
       <form className="stack" onSubmit={onSubmit} noValidate={false}>
         <div className="field">
-          <label htmlFor="username">Gebruikersnaam</label>
+          <label htmlFor="username">Username</label>
           <input
             id="username"
             name="username"
@@ -48,12 +48,12 @@ export default function Login() {
           />
           {!isLogin && (
             <span id="username-hint" className="hint">
-              3–24 tekens: letters, cijfers, punt, streepje of underscore.
+              3–24 characters: letters, numbers, periods, hyphens, or underscores.
             </span>
           )}
         </div>
         <div className="field">
-          <label htmlFor="password">Wachtwoord</label>
+          <label htmlFor="password">Password</label>
           <input
             id="password"
             name="password"
@@ -66,7 +66,7 @@ export default function Login() {
           />
           {!isLogin && (
             <span id="password-hint" className="hint">
-              Minstens 8 tekens.
+              At least 8 characters.
             </span>
           )}
         </div>
@@ -76,13 +76,13 @@ export default function Login() {
           </p>
         )}
         <button className="btn btn-primary" type="submit" disabled={busy}>
-          {busy ? 'Even geduld…' : isLogin ? 'Inloggen' : 'Account maken'}
+          {busy ? 'One moment…' : isLogin ? 'Log in' : 'Create account'}
         </button>
       </form>
       <p className="switch">
-        {isLogin ? 'Nog geen account?' : 'Al een account?'}{' '}
+        {isLogin ? "Don't have an account?" : 'Already have an account?'}{' '}
         <button type="button" className="link-button" onClick={() => setMode(isLogin ? 'register' : 'login')}>
-          {isLogin ? 'Word lid' : 'Log in'}
+          {isLogin ? 'Sign up' : 'Log in'}
         </button>
       </p>
     </section>

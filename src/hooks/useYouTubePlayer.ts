@@ -2,13 +2,12 @@ import { useCallback, useEffect, useRef, useState, type RefObject } from 'react'
 
 /* Minimal types for the YouTube IFrame Player API. */
 interface YTPlayer {
-  loadPlaylist(ids: string[], index?: number, startSeconds?: number): void;
-  cuePlaylist(ids: string[], index?: number, startSeconds?: number): void;
+  loadVideoById(opts: { videoId: string; startSeconds?: number }): void;
   playVideo(): void;
   pauseVideo(): void;
   seekTo(seconds: number, allowSeekAhead: boolean): void;
   getCurrentTime(): number;
-  getPlaylistIndex(): number;
+  getIframe(): HTMLIFrameElement;
   destroy(): void;
 }
 declare global {
@@ -37,7 +36,7 @@ function loadApi() {
 }
 
 export interface PlayerEvents {
-  /** The last video of the playlist has ended. */
+  /** The last track of the album has ended. */
   onAlbumEnd?: () => void;
   onTrackChange?: (index: number) => void;
 }
@@ -45,6 +44,8 @@ export interface PlayerEvents {
 /**
  * Wraps the YouTube IFrame Player. No API key needed.
  * YouTube's own controls are off: you control playback with the turntable.
+ * Tracks are loaded one by one (not as a YouTube playlist), so YouTube shows
+ * no previous/next buttons; the hook moves on to the next track itself.
  */
 export function useYouTubePlayer(
   mount: RefObject<HTMLDivElement | null>,
@@ -63,14 +64,30 @@ export function useYouTubePlayer(
   const readyRef = useRef(false);
   /** Command given before the player was ready; executed in onReady. */
   const pending = useRef<[number, number] | null>(null);
-  /** Which playlist is loaded in the player now (videoIds joined). */
+  /** Which album (videoIds joined) and which track are loaded in the player now. */
   const loadedKey = useRef('');
-  const load = (i: number, seconds: number) => {
-    loadedKey.current = idsRef.current.join(',');
-    player.current?.loadPlaylist(idsRef.current, i, seconds);
-  };
+  const loadedIndex = useRef(-1);
   const [state, setState] = useState<number>(STATE.UNSTARTED);
   const [index, setIndex] = useState(0);
+  const load = (i: number, seconds: number) => {
+    const videoId = idsRef.current[i];
+    if (!videoId) return;
+    loadedKey.current = idsRef.current.join(',');
+    loadedIndex.current = i;
+    setIndex(i);
+    player.current?.loadVideoById({ videoId, startSeconds: seconds });
+  };
+  /** On to the next track, or the album is over. */
+  const next = () => {
+    const i = loadedIndex.current;
+    if (i < idsRef.current.length - 1) {
+      load(i + 1, 0);
+      setTime(0);
+      eventsRef.current.onTrackChange?.(i + 1);
+    } else {
+      eventsRef.current.onAlbumEnd?.();
+    }
+  };
   const [time, setTime] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
@@ -78,7 +95,7 @@ export function useYouTubePlayer(
     if (!enabled) return;
     let cancelled = false;
     const failTimer = setTimeout(
-      () => !cancelled && setError('De YouTube-speler kon niet laden. Wordt youtube.com geblokkeerd in deze browser?'),
+      () => !cancelled && setError("The YouTube player couldn't load. Is youtube.com blocked in this browser?"),
       10_000,
     );
     loadApi().then(() => {
@@ -90,7 +107,9 @@ export function useYouTubePlayer(
         height: '100%',
         playerVars: { controls: 0, disablekb: 1, fs: 0, rel: 0, playsinline: 1, iv_load_policy: 3 },
         events: {
-          onReady: () => {
+          onReady: (e: { target: YTPlayer }) => {
+            // Not reachable with the keyboard either: the turntable is the control.
+            e.target.getIframe().tabIndex = -1;
             clearTimeout(failTimer);
             setError(null);
             readyRef.current = true;
@@ -100,28 +119,19 @@ export function useYouTubePlayer(
               pending.current = null;
             }
           },
-          onStateChange: (e: { data: number; target: YTPlayer }) => {
+          onStateChange: (e: { data: number }) => {
             setState(e.data);
-            const i = e.target.getPlaylistIndex();
-            if (i >= 0) {
-              setIndex((prev) => {
-                if (prev !== i) eventsRef.current.onTrackChange?.(i);
-                return i;
-              });
-            }
             if (e.data === STATE.PLAYING) setError(null);
-            if (e.data === STATE.ENDED && i === idsRef.current.length - 1) eventsRef.current.onAlbumEnd?.();
+            if (e.data === STATE.ENDED) next();
           },
-          onError: (e: { data: number; target: YTPlayer }) => {
+          onError: (e: { data: number }) => {
             const msg: Record<number, string> = {
-              100: 'Dit nummer is niet (meer) beschikbaar',
-              101: 'Dit nummer mag niet ingesloten worden',
-              150: 'Dit nummer mag niet ingesloten worden',
+              100: 'This track is no longer available',
+              101: "This track can't be embedded",
+              150: "This track can't be embedded",
             };
-            setError(`${msg[e.data] ?? `Afspeelfout ${e.data}`} — door naar het volgende nummer`);
-            const i = e.target.getPlaylistIndex();
-            if (i < idsRef.current.length - 1) setTimeout(() => load(i + 1, 0), 1500);
-            else eventsRef.current.onAlbumEnd?.();
+            setError(`${msg[e.data] ?? `Playback error ${e.data}`}, skipping to the next track`);
+            setTimeout(next, 1500);
           },
         },
       });
@@ -156,7 +166,7 @@ export function useYouTubePlayer(
       }
       // Only seek within the current track if it's still the same album.
       const sameAlbum = loadedKey.current === idsRef.current.join(',');
-      if (sameAlbum && i === p.getPlaylistIndex() && state !== STATE.UNSTARTED && state !== STATE.CUED) {
+      if (sameAlbum && i === loadedIndex.current && state !== STATE.UNSTARTED && state !== STATE.CUED) {
         p.seekTo(seconds, true);
         p.playVideo();
       } else {

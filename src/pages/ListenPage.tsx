@@ -6,7 +6,7 @@ import { useAuth } from '../context/auth.tsx';
 import { PlayerSlot, useListening } from '../context/listening.tsx';
 import Turntable from '../components/turntable/Turntable.tsx';
 import ArtistLink from '../components/ArtistLink.tsx';
-import AlbumDetails from '../components/listen/AlbumDetails.tsx';
+import AlbumDetails, { TrackDetails, useAlbumMeta } from '../components/listen/AlbumDetails.tsx';
 import { fmtTime, fmtTokens } from '../lib/format.ts';
 import type { AlbumDetail } from '../../shared/types.ts';
 
@@ -25,7 +25,7 @@ export default function ListenPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, album.data]);
 
-  if (loading || album.loading) return <p role="status">Plaat uit de hoes halen…</p>;
+  if (loading || album.loading) return <p role="status">Pulling the record out of its sleeve…</p>;
   if (album.error)
     return (
       <p className="notice error" role="alert">
@@ -35,16 +35,16 @@ export default function ListenPage() {
   if (!user)
     return (
       <section className="stack" aria-labelledby="login-needed">
-        <h1 id="login-needed">Eerst even inloggen</h1>
-        <p>Log in om {album.data!.title} op te leggen en tokens te verdienen voor het luisteren.</p>
+        <h1 id="login-needed">Log in first</h1>
+        <p>Log in to put {album.data!.title} on the turntable and earn tokens for listening.</p>
         <p>
-          <Link className="btn btn-primary" to="/inloggen" state={{ from: location.pathname }}>
-            Inloggen
+          <Link className="btn btn-primary" to="/login" state={{ from: location.pathname }}>
+            Log in
           </Link>
         </p>
       </section>
     );
-  if (listening.album?.id !== id) return <p role="status">Plaat opleggen…</p>;
+  if (listening.album?.id !== id) return <p role="status">Putting the record on…</p>;
   return <Listening album={listening.album} />;
 }
 
@@ -52,11 +52,12 @@ function Listening({ album }: { album: AlbumDetail }) {
   const l = useListening();
   const tracks = album.tracks;
   const current = tracks[l.loc.track];
+  const { meta, loading } = useAlbumMeta(album.id);
 
   return (
     <article className="listen-page" aria-labelledby="listen-title">
       <header className="listen-head">
-        <p className="eyebrow">Op de draaitafel</p>
+        <p className="eyebrow">On the turntable</p>
         <h1 id="listen-title">
           {album.title}{' '}
           <span className="by">
@@ -72,32 +73,35 @@ function Listening({ album }: { album: AlbumDetail }) {
       )}
 
       <div className="listen-layout">
-        <Turntable
-          cover={album.cover}
-          title={album.title}
-          tracks={tracks}
-          elapsed={l.elapsed}
-          needle={l.needle}
-          spinning={l.spinning}
-          onDrop={l.onDrop}
-          onLift={l.onLift}
-          onRest={l.onRest}
-          onToggleMotor={l.onToggleMotor}
-        />
+        <div className="listen-main">
+          <Turntable
+            cover={album.cover}
+            title={album.title}
+            tracks={tracks}
+            elapsed={l.elapsed}
+            needle={l.needle}
+            spinning={l.spinning}
+            onDrop={l.onDrop}
+            onLift={l.onLift}
+            onRest={l.onRest}
+            onToggleMotor={l.onToggleMotor}
+          />
+          <TrackDetails album={album} trackIndex={l.loc.track} meta={meta} loading={loading} />
+        </div>
 
-        <aside className="listen-side" aria-label="Wat er speelt">
+        <aside className="listen-side" aria-label="Now playing">
           <section className="now-playing" aria-live="polite" aria-atomic="true">
-            <h2 className="visually-hidden">Nu</h2>
+            <h2 className="visually-hidden">Now</h2>
             {l.needle === 'down' ? (
               <>
                 <p className="eyebrow">
-                  Nummer {l.loc.track + 1} van {tracks.length}
-                  {l.buffering && ' · laden…'}
+                  Track {l.loc.track + 1} of {tracks.length}
+                  {l.buffering && ' · loading…'}
                 </p>
                 <p className="track-title">{current.title}</p>
               </>
             ) : (
-              <p className="track-title muted">{l.result ? 'Kant uit.' : 'De naald rust.'}</p>
+              <p className="track-title muted">{l.result ? 'Side over.' : 'The needle is resting.'}</p>
             )}
           </section>
           <p className="time" aria-hidden="true">
@@ -105,7 +109,7 @@ function Listening({ album }: { album: AlbumDetail }) {
           </p>
           {l.autoplayBlocked && (
             <p className="notice" role="status">
-              Je browser hield automatisch afspelen tegen. Druk op <strong>Start</strong> om de plaat te laten draaien.
+              Your browser blocked autoplay. Press <strong>Start</strong> to spin the record.
             </p>
           )}
           {l.playerError && (
@@ -115,22 +119,29 @@ function Listening({ album }: { album: AlbumDetail }) {
           )}
 
           <div className="earnings">
+            {/* What this record has earned so far; only counts from half heard */}
+            <p className="tokens tokens-live" data-pending={l.coverage < 0.5 || undefined}>
+              <span className="coin" aria-hidden="true" />
+              <span>
+                {fmtTokens(Math.round(l.potential * l.coverage))}
+                <span className="of"> / {fmtTokens(l.potential)} tokens</span>
+              </span>
+            </p>
             <label htmlFor="heard">
-              Gehoord: <strong>{Math.round(l.coverage * 100)}%</strong>
+              Heard: <strong>{Math.round(l.coverage * 100)}%</strong>
             </label>
             <meter id="heard" min={0} max={1} low={0.5} optimum={1} value={l.coverage}>
               {Math.round(l.coverage * 100)}%
             </meter>
             <p className="muted">
-              {l.isRepeat ? 'Herbeluistering' : 'Eerste keer'}: tot {fmtTokens(l.potential)} tokens. Minstens de helft horen om
-              te verdienen. Je kunt gerust verder kijken in de app: de plaat blijft draaien.
+              {l.isRepeat ? 'Repeat listen' : 'First listen'}: up to {fmtTokens(l.potential)} tokens. Hear at least half to
+              earn them. Feel free to browse the app: the record keeps spinning.
             </p>
           </div>
 
           {/* YouTube requires a visible player (min. 200×200); the app-wide player is positioned here. */}
-          <section className="yt-monitor" aria-label="Videobron (YouTube)">
+          <section className="yt-monitor" aria-label="Video source (YouTube)">
             <PlayerSlot className="yt-screen" />
-            <p className="muted">Bron: YouTube</p>
           </section>
 
           <ol className="tracklist compact" aria-label="Tracklist">
@@ -145,18 +156,18 @@ function Listening({ album }: { album: AlbumDetail }) {
           <div className="album-actions">
             {l.result ? (
               <button className="btn" type="button" onClick={l.replay}>
-                Opnieuw opleggen
+                Play again
               </button>
             ) : (
               <button className="btn btn-ghost" type="button" onClick={l.finish} disabled={!l.session}>
-                Haal de plaat eraf
+                Take the record off
               </button>
             )}
           </div>
         </aside>
       </div>
 
-      <AlbumDetails album={album} trackIndex={l.loc.track} />
+      <AlbumDetails album={album} trackIndex={l.loc.track} meta={meta} loading={loading} />
     </article>
   );
 }

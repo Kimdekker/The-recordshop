@@ -1,13 +1,13 @@
 import type {
   AlbumDetail,
   AlbumMeta,
-  AlbumSummary,
   CollectionEntry,
   DiaryEntry,
   ListenResult,
   ListenStart,
   Review,
   SearchResult,
+  Shelf,
   User,
 } from '../../shared/types.ts';
 
@@ -28,7 +28,7 @@ async function request<T>(method: string, url: string, body?: unknown, init?: Re
     ...init,
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new ApiError(res.status, data.error ?? `Er ging iets mis (${res.status})`);
+  if (!res.ok) throw new ApiError(res.status, data.error ?? `Something went wrong (${res.status})`);
   return data as T;
 }
 
@@ -42,7 +42,8 @@ export const api = {
   logout: () => post<{ ok: true }>('/auth/logout'),
 
   search: (q: string) => get<{ results: SearchResult[] }>(`/albums/search?q=${encodeURIComponent(q)}`),
-  shelves: () => get<{ recent: AlbumSummary[]; topRated: AlbumSummary[]; gems: AlbumSummary[] }>('/albums/shelves'),
+  shelves: () => get<{ shelves: Shelf[] }>('/albums/shelves'),
+  shelf: (id: string) => get<{ shelf: Shelf }>(`/albums/shelves/${encodeURIComponent(id)}`),
   artist: (name: string) =>
     get<{ artist: string; albums: SearchResult[] }>(`/albums/artist/${encodeURIComponent(name)}`),
   album: (id: string) => get<{ album: AlbumDetail }>(`/albums/${encodeURIComponent(id)}`),

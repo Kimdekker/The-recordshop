@@ -45,12 +45,13 @@
   :root {
     color-scheme: dark;
 
-    --bg: oklch(0.17 0.012 55);
-    --bg-raised: oklch(0.21 0.014 55);
-    --surface: oklch(0.25 0.016 55);
-    --line: oklch(0.34 0.018 55);
-    --text: oklch(0.94 0.02 80);
-    --text-muted: oklch(0.74 0.025 70);
+    /* Warm mid-tone brown: light enough that a black LP stands out */
+    --bg: oklch(0.31 0.022 55);
+    --bg-raised: oklch(0.355 0.024 55);
+    --surface: oklch(0.4 0.026 55);
+    --line: oklch(0.47 0.026 55);
+    --text: oklch(0.96 0.015 80);
+    --text-muted: oklch(0.82 0.022 70);
     --accent: oklch(0.74 0.16 50);
     --accent-strong: oklch(0.68 0.18 45);
     --accent-ink: oklch(0.2 0.04 45);
@@ -75,8 +76,8 @@
 @layer base {
   body {
     background:
-      radial-gradient(1200px 700px at 0% -10%, oklch(0.3 0.06 50 / 0.6), transparent 60%),
-      radial-gradient(900px 600px at 110% 10%, oklch(0.28 0.05 30 / 0.35), transparent 60%),
+      radial-gradient(1200px 700px at 0% -10%, oklch(0.42 0.07 55 / 0.55), transparent 60%),
+      radial-gradient(900px 600px at 110% 10%, oklch(0.4 0.06 35 / 0.35), transparent 60%),
       var(--bg);
     background-attachment: fixed;
     color: var(--text);
@@ -158,33 +159,114 @@
     }
   }
 
-  .site-header {
-    position: sticky;
-    inset-block-start: 0;
-    z-index: 20;
-    background: color-mix(in oklch, var(--bg) 82%, transparent);
-    backdrop-filter: blur(12px) saturate(1.2);
-    border-block-end: 1px solid var(--line);
+  /* --- Floating sidebar ------------------------------------------------------
+     ≥700px: slim icon rail; on hover/focus an item slides out with its label,
+     floating over the rest of the UI.
+     <700px: floating bar at the top (the mini player owns the bottom there) */
+  :root {
+    --sidebar-w: 0px;
+    --sidebar-inset: 1rem;
+    --sidebar-space: 0px;
+    /* Width of one item in the rail (icon centered) */
+    --side-item: 2.9rem;
 
-    > .inner {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 0.75rem 1.5rem;
-      max-inline-size: var(--content);
-      margin-inline: auto;
-      padding: 0.85rem var(--gutter);
+    @media (min-width: 700px) {
+      --sidebar-w: 4rem;
+      --sidebar-space: calc(var(--sidebar-w) + var(--sidebar-inset) * 2);
+    }
+  }
+
+  .sidebar {
+    position: sticky;
+    inset-block-start: 0.5rem;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0.5rem;
+    padding: 0.4rem 0.5rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-l);
+    background: color-mix(in oklch, var(--bg-raised) 85%, transparent);
+    backdrop-filter: blur(14px) saturate(1.3);
+    box-shadow:
+      0 1px 0 oklch(1 0 0 / 0.05) inset,
+      0 20px 40px -18px oklch(0 0 0 / 0.75);
+
+    @media (min-width: 700px) {
+      position: fixed;
+      inset: var(--sidebar-inset) auto var(--sidebar-inset) var(--sidebar-inset);
+      inline-size: var(--sidebar-w);
+      flex-direction: column;
+      /* Items on the left edge of their slot, so they only grow to the right */
+      align-items: stretch;
+      gap: 1rem;
+      margin: 0;
+      padding: 0.9rem calc((var(--sidebar-w) - 2px - var(--side-item)) / 2);
+    }
+  }
+
+  /* Shared look of everything in the rail: a pill that grows with its label */
+  .sidebar {
+    --icon: 1.35rem;
+  }
+  .sidebar :is(.brand, .main-nav a, .who, .side-action) {
+    position: relative;
+    display: flex;
+    align-items: center;
+    inline-size: max-content;
+    min-block-size: 2.75rem;
+    padding-block: 0.5rem;
+    padding-inline: calc((var(--side-item) - var(--icon)) / 2);
+    border: 1px solid transparent;
+    border-radius: 999px;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-weight: 500;
+    white-space: nowrap;
+    transition:
+      color 0.15s,
+      background-color 0.15s,
+      box-shadow 0.2s;
+  }
+  .sidebar .icon {
+    flex: none;
+    inline-size: var(--icon);
+    block-size: var(--icon);
+  }
+  /* The label: closed it takes no width, open it slides out */
+  .sidebar .nav-label {
+    max-inline-size: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition:
+      max-inline-size 0.25s cubic-bezier(0.2, 0.8, 0.2, 1),
+      opacity 0.15s,
+      padding 0.25s;
+  }
+  @media (min-width: 700px) {
+    .sidebar :is(.brand, .main-nav a, .who, .side-action):is(:hover, :focus-visible) {
+      z-index: 1;
+      color: var(--text);
+      background: var(--bg-raised);
+      border-color: var(--line);
+      box-shadow: 0 12px 28px -10px oklch(0 0 0 / 0.7);
+
+      .nav-label {
+        max-inline-size: 14rem;
+        padding-inline: 0.7rem 0.35rem;
+        opacity: 1;
+      }
     }
   }
 
   .brand {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    font: 800 1.35rem/1 var(--font-display);
-    text-decoration: none;
+    color: var(--text) !important;
+    font: 800 1.05rem/1.1 var(--font-display) !important;
 
+    --icon: 1.6rem;
     .disc {
+      flex: none;
       inline-size: 1.6rem;
       aspect-ratio: 1;
       border-radius: 50%;
@@ -192,35 +274,53 @@
         radial-gradient(circle, var(--accent) 0 20%, oklch(0.12 0 0) 21% 26%, transparent 27%),
         repeating-radial-gradient(circle, oklch(0.14 0 0) 0 1px, oklch(0.2 0 0) 1px 2px);
       box-shadow: 0 0 0 1px oklch(0.3 0 0);
+      transition: rotate 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    &:hover .disc {
+      rotate: 180deg;
     }
   }
 
   .main-nav {
-    margin-inline-end: auto;
+    flex: 1;
 
+    @media (min-width: 700px) {
+      padding-block-start: 1rem;
+      border-block-start: 1px solid var(--line);
+    }
     ul {
       display: flex;
-      flex-wrap: wrap;
       gap: 0.25rem;
       padding: 0;
       list-style: none;
+
+      @media (min-width: 700px) {
+        flex-direction: column;
+      }
     }
     a {
-      display: block;
-      padding: 0.45rem 0.8rem;
-      border-radius: 999px;
-      color: var(--text-muted);
-      text-decoration: none;
-      font-weight: 500;
-
       &:hover {
         color: var(--text);
-        background: var(--surface);
       }
       &[aria-current='page'] {
         color: var(--text);
         background: var(--surface);
-        box-shadow: inset 0 0 0 1px var(--line);
+
+        .icon {
+          color: var(--accent);
+        }
+        /* Little indicator on the edge of the rail */
+        @media (min-width: 700px) {
+          &::before {
+            content: '';
+            position: absolute;
+            inset-block: 0.65rem;
+            inset-inline-start: calc((var(--sidebar-w) - 2px - var(--side-item)) / -2 - 1px);
+            inline-size: 3px;
+            border-radius: 0 3px 3px 0;
+            background: var(--accent);
+          }
+        }
       }
     }
   }
@@ -228,19 +328,65 @@
   .account {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
+    gap: 0.25rem;
 
-    @media (max-width: 960px) {
-      .username {
-        display: none;
+    @media (min-width: 700px) {
+      flex-direction: column;
+      align-items: flex-start;
+      padding-block-start: 1rem;
+      border-block-start: 1px solid var(--line);
+    }
+    .who {
+      margin: 0;
+    }
+  }
+  .side-action {
+    background: none;
+    font: inherit;
+    cursor: pointer;
+
+    &.primary {
+      color: var(--accent-ink) !important;
+      background: var(--accent) !important;
+
+      &:hover {
+        background: var(--accent-strong) !important;
       }
     }
   }
 
+  /* Phone: icons only, labels only for screen readers; account on the right */
+  @media (max-width: 699px) {
+    .sidebar .nav-label {
+      position: absolute;
+      inline-size: 1px;
+      block-size: 1px;
+      clip-path: inset(50%);
+    }
+    .main-nav {
+      flex: 0 1 auto;
+      margin-inline: auto;
+    }
+    .sidebar .account .who {
+      display: none;
+    }
+  }
+
+  .page {
+    padding-inline-start: var(--sidebar-space);
+  }
+
   main {
+    /* Right padding as a variable: carousels use it to bleed to the window edge */
+    --pad-end: var(--gutter);
     max-inline-size: var(--content);
     margin-inline: auto;
-    padding: clamp(1.5rem, 4vw, 3rem) var(--gutter) 6rem;
+    padding: clamp(1.5rem, 4vw, 3rem) var(--pad-end) 6rem var(--gutter);
+
+    /* Discover: full width, the shelves run to the right edge of the window */
+    &:has(> .discover) {
+      max-inline-size: none;
+    }
   }
 
   .site-footer {

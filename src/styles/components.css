@@ -141,6 +141,17 @@
       position: relative;
       aspect-ratio: 1;
       margin-block-end: 0.75rem;
+      transform-origin: 50% 60%;
+      transition: scale 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    /* Hovered card on top of its neighbours: its record rolls out over the next album */
+    &:hover,
+    &:focus-within {
+      z-index: 5;
+
+      .sleeve {
+        scale: 1.06;
+      }
     }
     .cover {
       position: relative;
@@ -162,6 +173,9 @@
       background:
         radial-gradient(circle, var(--accent) 0 15%, oklch(0.1 0 0) 16% 18%, transparent 19%),
         repeating-radial-gradient(circle, oklch(0.14 0 0) 0 2px, oklch(0.09 0 0) 2px 4px);
+      box-shadow:
+        0 0 0 1px oklch(1 0 0 / 0.08),
+        6px 10px 18px -6px oklch(0 0 0 / 0.6);
       transition: translate 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
     }
     &:hover .peek,
@@ -240,20 +254,119 @@
     }
   }
 
-  .shelf {
+  /* --- Carousel (a shelf you can swipe through) ------------------------ */
+  .carousel {
+    --card: clamp(140px, 38vw, 190px);
+    --gap: 1.25rem;
+    /* As a grid/flex item it must not grow to the width of all its cards */
+    min-inline-size: 0;
+  }
+  .carousel-head {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-block-end: 1rem;
+
+    h2 a {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 0.35rem;
+      text-decoration: none;
+
+      &:hover {
+        color: var(--accent);
+      }
+    }
+    .chevron {
+      color: var(--accent);
+      transition: translate 0.2s;
+    }
+    h2 a:is(:hover, :focus-visible) .chevron {
+      translate: 0.2em 0;
+    }
+    p {
+      margin-block-start: 0.2rem;
+      font-size: 0.95rem;
+    }
+  }
+  .carousel-buttons {
+    display: flex;
+    gap: 0.4rem;
+
+    /* Touch screens swipe; the buttons are for mouse users */
+    @media (pointer: coarse) {
+      display: none;
+    }
+  }
+  .round-btn {
+    display: grid;
+    place-items: center;
+    inline-size: 2.4rem;
+    aspect-ratio: 1;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    background: var(--bg-raised);
+    color: var(--text);
+    font-size: 1.4rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background-color 0.15s, opacity 0.15s;
+
+    &:hover:not(:disabled) {
+      background: var(--surface);
+    }
+    &:disabled {
+      opacity: 0.35;
+      cursor: default;
+    }
+  }
+  .carousel-track {
+    /* Containing block for absolutely positioned children (e.g. screen reader text),
+       otherwise they escape the scroller and widen the page */
+    position: relative;
     display: grid;
     grid-auto-flow: column;
-    grid-auto-columns: minmax(160px, 190px);
-    gap: 1.25rem;
+    grid-auto-columns: var(--card);
+    gap: var(--gap);
+    /* Left: room for shadows and the record peeking out. Right: bleed to the
+       window edge (through main's right padding, also under the mini player). */
+    margin-inline: calc(var(--gap) * -1) calc(var(--pad-end, var(--gutter)) * -1);
+    padding: 0.5rem var(--pad-end, var(--gutter)) 1.25rem var(--gap);
+    scroll-padding-inline: var(--gap);
     overflow-x: auto;
     overscroll-behavior-x: contain;
     scroll-snap-type: x mandatory;
-    padding: 0 0 1rem;
     list-style: none;
-    scrollbar-width: thin;
+    scrollbar-width: none;
+    /* Fade at the edges as a hint that there is more */
+    mask: linear-gradient(90deg, transparent, #000 var(--gap), #000 calc(100% - 3rem), transparent);
 
+    &::-webkit-scrollbar {
+      display: none;
+    }
+    &:focus-visible {
+      outline-offset: -2px;
+    }
     > li {
       scroll-snap-align: start;
+    }
+  }
+  .carousel-more a {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    padding: 1rem;
+    border: 1px dashed var(--line);
+    border-radius: 4px;
+    color: var(--text-muted);
+    text-align: center;
+    text-decoration: none;
+    font-weight: 600;
+
+    &:hover {
+      border-color: var(--accent);
+      color: var(--accent);
     }
   }
 
@@ -337,9 +450,9 @@
     border: 1px solid color-mix(in oklch, var(--gold) 35%, transparent);
     border-radius: 999px;
     background: color-mix(in oklch, var(--gold) 10%, var(--bg-raised));
+    margin: 0;
     font-weight: 700;
     font-variant-numeric: tabular-nums;
-    cursor: pointer;
 
     .coin {
       inline-size: 1.3rem;
@@ -348,30 +461,6 @@
       background:
         radial-gradient(circle at 35% 30%, oklch(0.95 0.1 90), var(--gold) 55%, oklch(0.6 0.12 70));
       box-shadow: inset 0 0 0 2px oklch(0.7 0.13 75);
-    }
-  }
-
-  .token-info {
-    inline-size: min(22rem, calc(100vw - 2rem));
-    padding: 1.1rem 1.2rem;
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    background: var(--bg-raised);
-    color: var(--text);
-    box-shadow: var(--shadow);
-    inset: auto;
-    position-area: bottom span-left;
-    margin-block-start: 0.5rem;
-
-    h2 {
-      font-size: 1.1rem;
-      margin-block-end: 0.5rem;
-    }
-    ul {
-      padding-inline-start: 1.1rem;
-      display: grid;
-      gap: 0.3rem;
-      font-size: 0.9rem;
     }
   }
 
@@ -447,6 +536,9 @@
     border-radius: var(--radius-s);
     overflow: hidden;
     background: #000;
+    /* Not interactive: you control the music with the turntable. Clicks fall
+       through to the slot underneath (in the mini player: a link to the turntable). */
+    pointer-events: none;
 
     &[data-hidden] {
       /* Not removed (that would stop the music), just tucked away. */
@@ -598,11 +690,53 @@
     font-size: 0.8rem;
     white-space: normal !important;
   }
+  .mini-transport {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    /* Right under the track line (the grid gap of .mini-info adds ~2px) */
+    margin-block-start: 0;
+  }
+  .icon-btn {
+    flex: none;
+    display: grid;
+    place-items: center;
+    inline-size: 2.25rem;
+    aspect-ratio: 1;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+    transition: background-color 0.15s, scale 0.15s;
+
+    .icon {
+      inline-size: 1.05rem;
+      block-size: 1.05rem;
+    }
+    &:hover {
+      background: var(--surface);
+    }
+    &:active {
+      scale: 0.94;
+    }
+    &.primary {
+      border-color: transparent;
+      background: var(--accent);
+      color: var(--accent-ink);
+
+      &:hover {
+        background: var(--accent-strong);
+      }
+    }
+  }
   .mini-progress {
     appearance: none;
+    flex: 1;
+    min-inline-size: 0;
     inline-size: 100%;
     block-size: 3px;
-    margin-block-start: 0.5rem;
     border: 0;
     border-radius: 3px;
     background: var(--line);
@@ -619,25 +753,16 @@
     }
   }
 
-  .mini-controls {
-    display: flex;
-    justify-content: center;
-    gap: 0.4rem;
-  }
-
   /* YouTube monitor: as subtle as allowed (visible, ≥ 200×200) */
   .mini-monitor {
     display: grid;
-    gap: 0.25rem;
     justify-items: center;
     padding-block-start: 0.75rem;
     border-block-start: 1px solid var(--line);
-    font-size: 0.65rem;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: color-mix(in oklch, var(--text-muted) 70%, transparent);
   }
   .mini-screen {
+    display: block;
+    cursor: pointer;
     inline-size: 200px;
     block-size: 200px;
     border-radius: var(--radius-s);
@@ -655,18 +780,14 @@
     }
     .mini-sleeve {
       grid-template-columns: 200px var(--panel);
-      grid-template-areas: 'monitor info' 'monitor controls';
+      grid-template-areas: 'monitor info';
       align-items: center;
     }
     .mini-info {
       grid-area: info;
     }
-    .mini-controls {
-      grid-area: controls;
-    }
     .mini-monitor {
       grid-area: monitor;
-      grid-row: 1 / span 2;
       padding: 0;
       border: 0;
     }
@@ -705,9 +826,6 @@
     .mini-info {
       text-align: start;
     }
-    .mini-controls .btn-ghost {
-      display: none;
-    }
     .mini-monitor {
       position: absolute;
       inset-inline-end: var(--gutter);
@@ -739,7 +857,10 @@
   /* Keep room for the mini player */
   @media (min-width: 700px) {
     body:has(.mini-player) main {
-      padding-inline-end: max(var(--gutter), calc(232px + 2.5rem - (100vw - var(--content)) / 2));
+      --pad-end: max(var(--gutter), calc(232px + 2.5rem - (100vw - var(--sidebar-space) - var(--content)) / 2));
+    }
+    body:has(.mini-player) main:has(> .discover) {
+      --pad-end: calc(232px + 2.5rem);
     }
   }
   @media (max-width: 699px) {
@@ -748,6 +869,43 @@
       .site-footer {
         padding-block-end: calc(6rem + 200px + 2rem);
       }
+    }
+  }
+}
+
+@layer components {
+  /* --- Tokens in the sidebar -------------------------------------------------- */
+  @media (min-width: 700px) {
+    /* Rail: coin above the number */
+    .sidebar .tokens {
+      inline-size: var(--side-item);
+      justify-content: center;
+      flex-direction: column;
+      gap: 0.2rem;
+      padding: 0.45rem 0.3rem;
+      border-radius: var(--radius);
+      font-size: 0.8rem;
+    }
+  }
+}
+
+@layer components {
+  /* --- Tokens earned by the record on the turntable --------------------------- */
+  .tokens-live {
+    justify-self: start;
+    font-size: 1.05rem;
+
+    .coin {
+      inline-size: 1.5rem;
+    }
+    .of {
+      color: var(--text-muted);
+      font-weight: 500;
+      font-size: 0.85em;
+    }
+    /* Under half heard: it doesn't count yet */
+    &[data-pending] .coin {
+      filter: grayscale(0.8) brightness(0.8);
     }
   }
 }

@@ -9,8 +9,9 @@ import { ALBUM_VERSION } from '../models/Album.ts';
 import { priceFor, rewardFor } from '../lib/tokens.ts';
 import { fetchAlbumMeta } from '../lib/metadata.ts';
 import { requireUser } from '../lib/auth.ts';
+import { buildShelf, SHELF_IDS } from '../lib/shelves.ts';
 import { HttpError, route } from '../lib/http.ts';
-import type { AlbumDetail, SearchResult } from '../../shared/types.ts';
+import type { AlbumDetail, SearchResult, ShelfId } from '../../shared/types.ts';
 
 export const albums = Router();
 
@@ -74,7 +75,7 @@ albums.get(
   '/artist/:name',
   route(async (req, res) => {
     const name = String(req.params.name).trim().slice(0, 100);
-    if (!name) throw new HttpError(400, 'Geen artiest opgegeven');
+    if (!name) throw new HttpError(400, 'No artist given');
     const yt = await cached(`artist:v2:${norm(name)}`, () => artistAlbums(name));
     const local = await Album.find({ artist: new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i'), version: ALBUM_VERSION })
       .limit(50)
@@ -87,21 +88,22 @@ albums.get(
   }),
 );
 
-/** Shelves for the discover page, all straight from the database (no quota). */
+/** Shelves for the discover page (short, for the carousels). No YouTube quota. */
 albums.get(
   '/shelves',
-  route(async (_req, res) => {
-    const [recent, topRated, gems] = await Promise.all([
-      Album.find({ lastListenedAt: { $ne: null } }).sort({ lastListenedAt: -1 }).limit(12).lean<AlbumDoc[]>(),
-      Album.aggregate<AlbumDoc>([
-        { $match: { ratingCount: { $gt: 0 } } },
-        { $addFields: { avg: { $divide: ['$ratingSum', '$ratingCount'] } } },
-        { $sort: { avg: -1, ratingCount: -1 } },
-        { $limit: 12 },
-      ]),
-      Album.find({ rarity: { $in: ['ontdekking', 'verborgen parel'] } }).sort({ createdAt: -1 }).limit(12).lean<AlbumDoc[]>(),
-    ]);
-    res.json({ recent: recent.map(toSummary), topRated: topRated.map(toSummary), gems: gems.map(toSummary) });
+  route(async (req, res) => {
+    const shelves = await Promise.all(SHELF_IDS.map((id) => buildShelf(id, req.user, 16)));
+    res.json({ shelves: shelves.filter((s) => s.albums.length) });
+  }),
+);
+
+/** One shelf in full, for its own page. */
+albums.get(
+  '/shelves/:id',
+  route(async (req, res) => {
+    const id = req.params.id as ShelfId;
+    if (!SHELF_IDS.includes(id)) throw new HttpError(404, "This shelf doesn't exist");
+    res.json({ shelf: await buildShelf(id, req.user, 60) });
   }),
 );
 
@@ -168,12 +170,12 @@ albums.put(
     const albumId = req.params.id;
     const rating = Number(req.body?.rating);
     if (!(rating >= 0.5 && rating <= 5 && Number.isInteger(rating * 2)))
-      throw new HttpError(400, 'Beoordeling moet tussen ½ en 5 sterren liggen.');
+      throw new HttpError(400, 'Rating must be between ½ and 5 stars.');
     const text = String(req.body?.text ?? '').trim().slice(0, 5000);
     const liked = Boolean(req.body?.liked);
 
     const heard = await Listen.exists({ user: user._id, album: albumId, finishedAt: { $ne: null } });
-    if (!heard) throw new HttpError(403, 'Luister eerst het hele album, dan kun je het beoordelen.');
+    if (!heard) throw new HttpError(403, 'Listen to the whole album first, then you can rate it.');
 
     const previous = await Review.findOne({ user: user._id, album: albumId }).lean<ReviewDoc>();
     const review = await Review.findOneAndUpdate(
@@ -214,8 +216,8 @@ albums.post(
       { new: true },
     ).lean();
     if (!updated) {
-      if (user.records.some((r) => r.album === album._id)) throw new HttpError(409, 'Deze plaat staat al in je kast.');
-      throw new HttpError(402, `Je hebt ${price - user.tokens} tokens te weinig.`);
+      if (user.records.some((r) => r.album === album._id)) throw new HttpError(409, "This record is already in your collection.");
+      throw new HttpError(402, `You're ${price - user.tokens} tokens short.`);
     }
     res.json({ balance: updated.tokens });
   }),

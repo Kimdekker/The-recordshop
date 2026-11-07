@@ -8,7 +8,7 @@ export interface Track {
   duration: number;
 }
 
-export type Rarity = 'klassieker' | 'bekend' | 'gewaardeerd' | 'ontdekking' | 'verborgen parel';
+export type Rarity = 'classic' | 'well-known' | 'acclaimed' | 'discovery' | 'hidden gem';
 
 export interface AlbumSummary {
   id: string; // YouTube playlist ID
@@ -44,6 +44,15 @@ export interface SearchResult {
   official: boolean;
   /** Already in The Recordshop catalogue. */
   inCatalogue: boolean;
+}
+
+export type ShelfId = 'for-you' | 'just-played' | 'hidden-gems' | 'top-rated';
+
+export interface Shelf {
+  id: ShelfId;
+  title: string;
+  intro: string;
+  albums: AlbumSummary[];
 }
 
 export interface User {

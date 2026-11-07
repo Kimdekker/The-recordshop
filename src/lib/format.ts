@@ -9,8 +9,8 @@ export const fmtTime = (s: number) => {
 export const fmtMinutes = (s: number) => `${Math.round(s / 60)} min`;
 
 export const fmtDate = (iso: string) =>
-  new Intl.DateTimeFormat('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(iso));
+  new Intl.DateTimeFormat('en-US', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(iso));
 
-export const fmtRating = (r: number) => r.toLocaleString('nl-NL', { maximumFractionDigits: 1 });
+export const fmtRating = (r: number) => r.toLocaleString('en-US', { maximumFractionDigits: 1 });
 
-export const fmtTokens = (n: number) => n.toLocaleString('nl-NL');
+export const fmtTokens = (n: number) => n.toLocaleString('en-US');

@@ -24,8 +24,8 @@ export default function AlbumCard({ album, owned, headingLevel: H = 'h3' }: Prop
           <div className="cover" />
         )}
         <div className="badges">
-          {owned && <span className="badge gold">In je kast</span>}
-          {full && (full.rarity === 'verborgen parel' || full.rarity === 'ontdekking') && (
+          {owned && <span className="badge gold">In your collection</span>}
+          {full && (full.rarity === 'hidden gem' || full.rarity === 'discovery') && (
             <span className="badge accent">{full.rarity}</span>
           )}
         </div>

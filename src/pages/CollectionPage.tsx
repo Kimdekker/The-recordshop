@@ -10,16 +10,16 @@ export default function CollectionPage() {
   const { data, loading, error } = useAsync(() => api.collection(), [user?.id]);
 
   return (
-    <section aria-labelledby="kast-title" className="collection-page">
+    <section aria-labelledby="collection-title" className="collection-page">
       <div className="section-head">
-        <h1 id="kast-title">Mijn platenkast</h1>
+        <h1 id="collection-title">My Collection</h1>
         {data && (
           <p>
-            {data.records.length} {data.records.length === 1 ? 'plaat' : 'platen'} · {fmtTokens(user?.tokens ?? 0)} tokens te besteden
+            {data.records.length} {data.records.length === 1 ? 'record' : 'records'} · {fmtTokens(user?.tokens ?? 0)} tokens to spend
           </p>
         )}
       </div>
-      {loading && <p role="status">Kast openen…</p>}
+      {loading && <p role="status">Opening your collection…</p>}
       {error && (
         <p className="notice error" role="alert">
           {error.message}
@@ -27,11 +27,11 @@ export default function CollectionPage() {
       )}
       {data && !data.records.length && (
         <div className="empty-shelf stack">
-          <p>Je kast is nog leeg.</p>
-          <p className="muted">Luister albums helemaal om tokens te verdienen, en koop daarmee de platen die je wilt houden.</p>
+          <p>Your collection is still empty.</p>
+          <p className="muted">Listen to albums all the way through to earn tokens, then use them to buy the records you want to keep.</p>
           <p>
             <Link className="btn btn-primary" to="/">
-              Ontdek albums
+              Discover albums
             </Link>
           </p>
         </div>

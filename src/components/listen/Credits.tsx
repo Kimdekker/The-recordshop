@@ -3,7 +3,7 @@ import ArtistLink from '../ArtistLink.tsx';
 
 /** Credits as a description list: role → names. */
 export default function Credits({ credits, artist }: { credits: Credit[]; artist: string }) {
-  if (!credits.length) return <p className="muted">Geen credits bekend.</p>;
+  if (!credits.length) return <p className="muted">No credits known.</p>;
   return (
     <dl className="credits">
       {credits.map((c) => (

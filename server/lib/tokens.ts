@@ -22,11 +22,11 @@ interface RarityTier {
 
 // Popularity = average YouTube views per track.
 const TIERS: RarityTier[] = [
-  { rarity: 'klassieker', minViews: 50_000_000, multiplier: 0.75 },
-  { rarity: 'bekend', minViews: 10_000_000, multiplier: 1 },
-  { rarity: 'gewaardeerd', minViews: 1_000_000, multiplier: 1.25 },
-  { rarity: 'ontdekking', minViews: 100_000, multiplier: 1.5 },
-  { rarity: 'verborgen parel', minViews: 0, multiplier: 2 },
+  { rarity: 'classic', minViews: 50_000_000, multiplier: 0.75 },
+  { rarity: 'well-known', minViews: 10_000_000, multiplier: 1 },
+  { rarity: 'acclaimed', minViews: 1_000_000, multiplier: 1.25 },
+  { rarity: 'discovery', minViews: 100_000, multiplier: 1.5 },
+  { rarity: 'hidden gem', minViews: 0, multiplier: 2 },
 ];
 
 export function rarityFor(avgViews: number): Rarity {

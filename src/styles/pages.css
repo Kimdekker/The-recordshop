@@ -8,21 +8,42 @@
   }
 
   /* --- Discover -------------------------------------------------------- */
-  .hero {
-    display: grid;
-    gap: 1rem;
-    padding-block: clamp(1rem, 4vw, 3rem) 1rem;
+  .discover-search {
+    display: block;
+    margin-block-end: clamp(2rem, 5vw, 3rem);
 
+    .search-form {
+      max-inline-size: none;
+    }
+    .input {
+      min-block-size: 3.25rem;
+      font-size: 1.05rem;
+    }
+  }
+  .shelves {
+    display: grid;
+    gap: clamp(2.5rem, 5vw, 3.5rem);
+  }
+
+  /* --- Shelf page (one shelf in full) ------------------------------------ */
+  .shelf-page {
+    .eyebrow a {
+      color: inherit;
+      text-decoration: none;
+
+      &::before {
+        content: '‹ ';
+      }
+      &:hover {
+        text-decoration: underline;
+      }
+    }
     h1 {
-      max-inline-size: 18ch;
+      margin-block: 0.25rem 0.5rem;
     }
     .lede {
-      max-inline-size: 52ch;
-      color: var(--text-muted);
-      font-size: 1.15rem;
-    }
-    search {
-      margin-block-start: 0.75rem;
+      max-inline-size: 60ch;
+      margin-block-end: 2rem;
     }
   }
 
@@ -212,7 +233,7 @@
 
     @media (min-width: 1000px) {
       position: sticky;
-      inset-block-start: 5.5rem;
+      inset-block-start: 1.5rem;
     }
   }
   .track-title {
@@ -325,17 +346,14 @@
 
 @layer pages {
   /* --- Album info and credits on the listen page ----------------- */
-  .album-details {
+  .listen-main {
     display: grid;
-    gap: clamp(2rem, 4vw, 3rem);
-    margin-block-start: clamp(2.5rem, 6vw, 4rem);
-    padding-block-start: clamp(2rem, 4vw, 3rem);
-    border-block-start: 1px solid var(--line);
+    gap: clamp(1.5rem, 3vw, 2.5rem);
+    min-inline-size: 0;
+  }
 
-    @media (min-width: 1000px) {
-      grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
-      align-items: start;
-    }
+  .details-now,
+  .details-album {
     h2 {
       margin-block-end: 1rem;
     }
@@ -349,10 +367,24 @@
   }
 
   .details-now {
+    padding-block-start: clamp(1.25rem, 3vw, 2rem);
+    border-block-start: 1px solid var(--line);
+  }
+
+  .details-album {
+    display: grid;
+    gap: clamp(2rem, 4vw, 3rem);
+    align-items: start;
+    margin-block-start: clamp(2.5rem, 6vw, 4rem);
+    padding-block-start: clamp(2rem, 4vw, 3rem);
+    border-block-start: 1px solid var(--line);
+
     @media (min-width: 1000px) {
-      position: sticky;
-      inset-block-start: 5.5rem;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     }
+  }
+  .details-tracks .track-credits {
+    margin-block-start: 1rem;
   }
 
   .credits {
